@@ -103,7 +103,7 @@ def dessin2(signal):                          #on lui passe le signal entre -1 e
     glob_canvas2.create_line(0,152, 600,152, width=1, fill="red")
     glob_canvas2.create_line(600,152, 590,142 , width=1, fill="red")
     glob_canvas2.create_line(600,152, 590,162, width=1, fill="red")
-    for i in range (0,100):
+    for i in range (1,100):
         t=i/100
         horizontal=int(t*8000)
         glob_canvas2.create_line(horizontal,148, horizontal,156, width=1, fill="red")
@@ -131,19 +131,23 @@ def dessin1(signal):
     glob_canvas1.create_line(0,27, 600,27, width=1, fill="red")
     glob_canvas1.create_line(600,27, 590,22, width=1, fill="red")
     glob_canvas1.create_line(600,27, 590,32, width=1, fill="red")
-    for i in range(0, 100):
-        t = i / 100
-        horizontal = int(t * 8000)
+    for i in range(1, 10):
+        t = i / 10
+        horizontal = int(t * 1000)
         glob_canvas1.create_line(horizontal, 23, horizontal, 31, width=1, fill="red")
         legende = "{0}s".format(t)
         glob_canvas1.create_text(horizontal, 36, text=legende, fill="black")
-    # AXE VERTICAL : trait, flèche, graduation tout les 0.25 sachant que les valeurs vont de -1 à 1 : donc 0=1 et 300=-1
+    # AXE VERTICAL : trait, flèche, graduation tout les 0.25 sachant que les valeurs vont de -1 à 1 : donc 0=1 et 50=-1
     y = signal[0]
     vertical_pre = 24*(1-y) +3
-    for i in range(1, 600):
-        y = signal[i]
+    for h in range(1, 600):
+        t=h/1000
+        ind=int(t * 8000)
+        if ind>=len(signal):
+            break                    #arrêter le dessin si on est arriver au bout du signal avant 0.6s
+        y=signal[ind]
         vertical = 24*(1-y) +3
-        glob_canvas1.create_line(i - 1, vertical_pre, i, vertical, width=1, fill="blue")
+        glob_canvas1.create_line(h - 1, vertical_pre, h, vertical, width=1, fill="blue")
         vertical_pre = vertical
     # glob_canvas1.pack(side=tk.BOTTOM)      #sûrement utile sur PC
     # glob_canvas1.update_idletasks()

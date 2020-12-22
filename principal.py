@@ -1,3 +1,5 @@
+from main import *
+
 import tkinter as tk
 from tkinter import Canvas
 
@@ -6,11 +8,15 @@ import simpleaudio.functionchecks as fc
 import numpy as np
 from numpy import pi
 
+from math import sqrt
+
 glob_racine = tk.Tk()
+glob_instrum=tk.StringVar()
 #Création des variables globales
 glob_canvas1=0
 glob_canvas2=0
 glob_po=0
+
 
 def test_son_gauche_droite():
     '''test son des haut-parleurs droit puis gauche'''
@@ -24,7 +30,13 @@ def ajout_partition():
     pass
 
 def ecrire_partition():
-    pass
+    (a,b)=transformation(partition,[],[])
+    freq=[]
+    duree=[]
+    for i in range (len(a)):
+        freq.append(a[i]*10)
+        duree.append(b[i])
+    joue_des_notes(freq,duree)
 
 def transposition():
     pass
@@ -32,14 +44,15 @@ def transposition():
 def inversion():
     pass
 
-def test_son():
+def instru_sinus():
     pass
 
-def instruments():
+def instru_rect():
     pass
 
 def vitesse():
     pass
+
 
 def choix_chanson():
     joue_des_notes([220, -1, 440, 220], [1.5, 0.5, 1.3, 0.5])
@@ -69,7 +82,12 @@ def mise_en_place_menus():
     menu_avancé.add_command(label="Test son haut-parleurs", command=test_son_gauche_droite)
     menu_avancé.add_command(label="Test son en superposition", command=test_son_superposition)
     menu_avancé.add_separator()
-    menu_avancé.add_command(label="Instruments", command=instruments)
+    menu_avancé.add_radiobutton(label="Instrument: sinus", var=glob_instrum, value="Sinus")
+    menu_avancé.add_radiobutton(label="Instrument: rectangles", var=glob_instrum, value="Rectangles")
+    menu_avancé.add_radiobutton(label="Instrument: orgue", var=glob_instrum, value="Orgue")
+    menu_avancé.add_radiobutton(label="Instrument: ovni", var=glob_instrum, value="Ovni")
+    glob_instrum.set("Sinus")
+    menu_avancé.add_separator()
     menu_avancé.add_command(label="Vitesse", command=vitesse)
     barre_menu.add_cascade(label="Avancé",menu=menu_avancé)
 
@@ -82,11 +100,26 @@ def mise_en_place_canvas():
 
 def joue_une_note(frequence,duree):
     global glob_po
-    temps=np.linspace(0,duree,int(8000*duree))
+    temps=np.linspace(0,duree,int(8000*duree))    #temps est une liste de temps
     if frequence>0:
-        signal=np.sin(temps*2*pi*frequence)
+        if glob_instrum.get()=="Sinus":
+            signal = np.sin(temps*2*pi*frequence)
+        elif glob_instrum.get()=="Rectangles":
+            signal = np.sign(np.sin(temps * 2 * pi * frequence))
+        elif glob_instrum.get()=="Orgue":
+            signal = 0.4*(np.sin(temps*2*pi*frequence)) + 0.5*(np.sin(temps*2*pi*(frequence/4))) + 0.1*(np.sin(temps*2*pi*(frequence*4)))
+        elif glob_instrum.get()=="Ovni":
+            signal = 0.2*(np.sin(temps*2*pi*frequence)) + 0.4*(np.sin(temps*2*pi*(frequence/sqrt(2)))) + 0.4*(np.sin(temps*2*pi*(frequence*sqrt(2))))
+        else:
+            print("Erreur : instrument inconnu")
+            return
     else:
         signal=temps*0.0
+
+    #enveloppe : important pour différencier à l'oreille 2 même notes qui se suivent
+    #TO DO : https: // fr.wikipedia.org / wiki / Enveloppe_sonore
+    enveloppe=np.exp(-temps*3)
+    signal=signal*enveloppe
 
     sig_16b=(signal*32767).astype(np.int16)          #signal sur 16 bits
     if glob_po!=0:                                  #attente de la fin d'une éventuelle note précédente

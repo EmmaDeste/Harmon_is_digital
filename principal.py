@@ -40,15 +40,6 @@ def ecrire_partition():
         duree.append(b[i])
     joue_des_notes(freq, duree)
 
-
-def transposition():
-    pass
-
-
-def inversion():
-    pass
-
-
 def instru_sinus():
     pass
 
@@ -62,8 +53,15 @@ def vitesse():
 
 
 def choix_chanson():
-    joue_des_notes([220, -1, 440, 220], [1.5, 0.5, 1.3, 0.5])
-    joue_des_notes([220], [0.5])
+    (n,d)=transformation(partition1)
+    print("n,d : ",n,d)
+    n=transposition(n,-7)
+    f=frequences(n)
+    print("n,f,d : ",n,f,d)
+    joue_des_notes(f,d)
+
+    #joue_des_notes([220, -1, 440, 220], [1.5, 0.5, 1.3, 0.5])
+    #joue_des_notes([220], [0.5])
 
 
 def mise_en_place_menus():
@@ -108,8 +106,9 @@ def mise_en_place_canvas():
     glob_canvas2.pack(side=tk.BOTTOM)
 
 
-def joue_une_note(frequence, duree):
+def joue_une_note(frequence, duree_musicale):
     global glob_po
+    duree = (duree_musicale * 0.125) / 2        #une croche a une durée musicale de 2 et une durée réelle de 125ms
     temps = np.linspace(0, duree, int(8000 * duree))  # temps est une liste de temps
     if frequence > 0:
         if glob_instrum.get() == "Sinus":

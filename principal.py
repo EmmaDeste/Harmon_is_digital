@@ -235,3 +235,7 @@ mise_en_place_menus()
 mise_en_place_canvas()
 glob_racine.mainloop()
 glob_racine.destroy()
+
+recueil = []
+receuil.append[("Happy birthday", "DOc Dob")]
+receuil.append[("J'ai du bon tabac", "DOn REn Min Don REn p Zc REn MIn FAn FAn Min Min")]

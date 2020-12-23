@@ -55,7 +55,8 @@ def vitesse():
 def choix_chanson():
     (n,d)=transformation(partition1)
     print("n,d : ",n,d)
-    n=transposition(n,-7)
+    n=transposition(n,-5)
+    #n=inversion(n)
     f=frequences(n)
     print("n,f,d : ",n,f,d)
     joue_des_notes(f,d)

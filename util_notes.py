@@ -40,7 +40,10 @@ def transposition(p, k):
     """
     t = []
     for i in range(len(p)):
-        a = (p[i] + k) % 12
+        if p[i]<0 :
+            a = p[i]
+        else:
+            a = (p[i] + k) % 12
         t.append(a)
     return t
 
@@ -48,14 +51,17 @@ def transposition(p, k):
 def inversion(p):
     i = []
     for y in range(len(p)):
-        a = (12 - p[y]) %12
+        if p[y]<0 :
+            a = p[y]
+        else:
+            a = (12 - p[y]) %12
         i.append(a)
     return i
 
 
 def frequences(l):
     f = []
-    dico_f={-1: 0, 0: 264, 1: 281.6,2: 297,3: 316.8,4: 330,5:352 ,6: 375.5,7: 396,8: 422.4,9: 440,10: 469.33,11: 495}
+    dico_f={-1: -1, 0: 264, 1: 281.6,2: 297,3: 316.8,4: 330,5:352 ,6: 375.5,7: 396,8: 422.4,9: 440,10: 469.33,11: 495}
     for s in l:
         f.append(dico_f[s])
     return f

@@ -9,14 +9,18 @@ import numpy as np
 from numpy import pi
 
 from math import sqrt
+import re      #expression régulière pour nettoyer les caractères spéciaux (ici le retour à la ligne)
 
 glob_racine = tk.Tk()
 glob_instrum = tk.StringVar()
+glob_inv=tk.StringVar()         #case inversion cochée ou non
+glob_transpo = tk.StringVar()
 # Creation des variables globales
 glob_canvas1 = 0
 glob_canvas2 = 0
 glob_po = 0
-
+glob_recueil=[]
+glob_lbchanson = 0
 
 def test_son_gauche_droite():
     '''test son des haut-parleurs droit puis gauche'''
@@ -32,19 +36,6 @@ def ajout_partition():
 
 
 def ecrire_partition():
-    (a, b) = transformation(partition, [], [])
-    freq = []
-    duree = []
-    for i in range(len(a)):
-        freq.append(a[i] * 10)
-        duree.append(b[i])
-    joue_des_notes(freq, duree)
-
-def instru_sinus():
-    pass
-
-
-def instru_rect():
     pass
 
 
@@ -52,17 +43,42 @@ def vitesse():
     pass
 
 
-def choix_chanson():
-    (n,d)=transformation(partition1)
+def jouer_chanson():
+    global glob_lbchanson, glob_recueil
+    num_chanson = glob_lbchanson.curselection()[0]
+    print('num : ',num_chanson)
+    partition=glob_recueil[num_chanson][1]
+    (n,d)=transformation(partition)
     print("n,d : ",n,d)
-    n=transposition(n,-5)
-    #n=inversion(n)
+    tr=int(glob_transpo.get())
+    n=transposition(n,tr)
+
+    inv=int(glob_inv.get())
+    if inv==1:
+        n=inversion(n)
+
     f=frequences(n)
     print("n,f,d : ",n,f,d)
     joue_des_notes(f,d)
 
     #joue_des_notes([220, -1, 440, 220], [1.5, 0.5, 1.3, 0.5])
     #joue_des_notes([220], [0.5])
+
+def mise_en_place_controles():
+    global glob_racine,glob_transpo
+    #inversion
+    cb=tk.Checkbutton(text="inversion", variable=glob_inv)
+    cb.pack(side = tk.RIGHT)
+    glob_inv.set('0')
+    #transposition
+    le=tk.Label(text="Transposition")
+    le.pack(side = tk.RIGHT)
+    e=tk.Entry(textvariable=glob_transpo)
+    e.pack(side = tk.RIGHT)
+    glob_transpo.set('0')
+    #jouer
+    bj=tk.Button(text="Jouer", command=jouer_chanson)
+    bj.pack(side = tk.RIGHT)
 
 
 def mise_en_place_menus():
@@ -81,23 +97,22 @@ def mise_en_place_menus():
     menu_transfo.add_command(label="Inversion", command=inversion)
     barre_menu.add_cascade(label="Transformation", menu=menu_transfo)
 
-    menu_jouer = tk.Menu(barre_menu)
-    menu_jouer.add_command(label="Choix de la chanson", command=choix_chanson)
-    barre_menu.add_cascade(label="Jouer", menu=menu_jouer)
-
-    menu_avancé = tk.Menu(barre_menu)
-    menu_avancé.add_command(label="Test son haut-parleurs", command=test_son_gauche_droite)
-    menu_avancé.add_command(label="Test son en superposition", command=test_son_superposition)
-    menu_avancé.add_separator()
-    menu_avancé.add_radiobutton(label="Instrument: sinus", var=glob_instrum, value="Sinus")
-    menu_avancé.add_radiobutton(label="Instrument: rectangles", var=glob_instrum, value="Rectangles")
-    menu_avancé.add_radiobutton(label="Instrument: orgue", var=glob_instrum, value="Orgue")
-    menu_avancé.add_radiobutton(label="Instrument: ovni", var=glob_instrum, value="Ovni")
+    menu_avance = tk.Menu(barre_menu)
+    menu_avance.add_command(label="Test son haut-parleurs", command=test_son_gauche_droite)
+    menu_avance.add_command(label="Test son en superposition", command=test_son_superposition)
+    menu_avance.add_separator()
+    menu_avance.add_radiobutton(label="Instrument: sinus", var=glob_instrum, value="Sinus")
+    menu_avance.add_radiobutton(label="Instrument: rectangles", var=glob_instrum, value="Rectangles")
+    menu_avance.add_radiobutton(label="Instrument: orgue", var=glob_instrum, value="Orgue")
+    menu_avance.add_radiobutton(label="Instrument: ovni", var=glob_instrum, value="Ovni")
     glob_instrum.set("Sinus")
-    menu_avancé.add_separator()
-    menu_avancé.add_command(label="Vitesse", command=vitesse)
-    barre_menu.add_cascade(label="Avancé", menu=menu_avancé)
+    menu_avance.add_separator()
+    menu_avance.add_command(label="Vitesse", command=vitesse)
+    barre_menu.add_cascade(label="Avancé", menu=menu_avance)
 
+    menu_quitter = tk.Menu(barre_menu)
+    menu_quitter.add_command(label="Quitter", command=glob_racine.quit)
+    barre_menu.add_cascade(label="Quitter", menu=menu_quitter)
 
 def mise_en_place_canvas():
     global glob_canvas1, glob_canvas2
@@ -109,6 +124,7 @@ def mise_en_place_canvas():
 
 def joue_une_note(frequence, duree_musicale):
     global glob_po
+    print(frequence)
     duree = (duree_musicale * 0.125) / 2        #une croche a une durée musicale de 2 et une durée réelle de 125ms
     temps = np.linspace(0, duree, int(8000 * duree))  # temps est une liste de temps
     if frequence > 0:
@@ -153,29 +169,29 @@ def dessin2(signal):  # on lui passe le signal entre -1 et 1
     for i in range(1, 100):
         t = i / 100
         horizontal = int(t * 8000)
-        glob_canvas2.create_line(horizontal, 148, horizontal, 156, width=1, fill="red")
+        glob_canvas2.create_line(horizontal+9, 148, horizontal+9, 156, width=1, fill="red")
         legende = "{0}s".format(t)
-        glob_canvas2.create_text(horizontal, 161, text=legende, fill="black")
+        glob_canvas2.create_text(horizontal+9, 161, text=legende, fill="black")
 
-    # AXE VERTICAL : trait, flèche, graduation tout les 0.25 sachant que les valeurs vont de -1 à 1 : donc 0=1 et 300=-1
-    glob_canvas2.create_line(5,300, 5,5, width=1, fill="red")
-    glob_canvas2.create_line(5,5, 10,10, width=1, fill="red")
-    glob_canvas2.create_line(5,5, 0,0, width=1, fill="red")
-    for i in range(1, 100):
-        t = i / 100
-        vertical = int(t * 8000)
-        glob_canvas2.create_line(vertical, 23, vertical, 156, width=1, fill="red")
-        legende = "{0}s".format(t)
-        glob_canvas2.create_text(vertical, 27, text=legende, fill="black")
+    # axe vertical
+    glob_canvas2.create_line(9,5, 9,300, width=1, fill="red")
+    glob_canvas2.create_line(9,5, 14,10, width=1, fill="red")
+    glob_canvas2.create_line(9,5, 4,10, width=1, fill="red")
+    for i in range(-4, 4):
+        y = i / 4
+        vertical = 149 * (1 - y) + 3
+        glob_canvas2.create_line(4,vertical, 14,vertical, width=1, fill="red")
+        legende = "{0}".format(y)
+        glob_canvas2.create_text(24,vertical, text=legende, fill="black")
 
     y = signal[0]
     vertic_pre = 149 * (1 - y) + 3
     for i in range(1, 600):
         y = signal[i]
         vertic = 149 * (1 - y) + 3
-        glob_canvas2.create_line(i - 1, vertic_pre, i, vertic, width=1, fill="blue")
+        glob_canvas2.create_line(i-1+9,vertic_pre, i+9, vertic, width=1, fill="blue")
         vertic_pre = vertic
-    # glob_canvas2.pack(side=tk.BOTTOM)      #sûrement utile sur PC
+    # glob_canvas2.pack(side=tk.BOTTOM)      #surement utile sur PC
     # glob_canvas2.update_idletasks()
     glob_canvas2.update()
 
@@ -228,14 +244,46 @@ def dessin1(signal):
 def dessine(signal):
     dessin1(signal)
     dessin2(signal)
-    dessin2(signal)
+
+def lecture_fichier():
+    recueil = []
+    file = open("partitions.txt","r")       #indicate "r"ead only
+    line1 = file.readline()
+    # https://qastack.fr/programming/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
+    line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)   #+ veut dire qu'on remplace les caractères spéciaux présents au moins une fois
+    line2 = file.readline()
+    line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
+    while line1 != "":             #pour éviter les fins de lignes et fin de fichier, spécial sur Mac
+        recueil.append((line1, line2))  # le dernier caractère de line est un passage à la ligne
+        line1 = file.readline()     # /!/ fin de ligne n'est pas codé pareil sur Mac et Windows
+        line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)
+        line2 = file.readline()
+        line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
+        print(line1)
+    file.close()
+    print(recueil)
+    return recueil
+
+def mise_en_place_liste_chansons():
+    global glob_lbchanson, glob_recueil
+    lb = tk.Listbox(glob_racine, width=80, height=6,
+                    selectmode=tk.SINGLE)
+    for element in glob_recueil:
+        (titre,part)=element
+        lb.insert(tk.END,titre)     #tk.END est une constante définie qu'on ajoute à la fin d'une liste
+    lb.select_set(0)                #défini la valeur par défaut
+    lb.pack(side = tk.TOP)
+    glob_lbchanson=lb
 
 
+mise_en_place_controles()
 mise_en_place_menus()
+glob_recueil=lecture_fichier()
+mise_en_place_liste_chansons()
 mise_en_place_canvas()
 glob_racine.mainloop()
 glob_racine.destroy()
 
-recueil = []
-receuil.append[("Happy birthday", "DOc Dob")]
-receuil.append[("J'ai du bon tabac", "DOn REn Min Don REn p Zc REn MIn FAn FAn Min Min")]
+
+recueil.append[("Happy birthday", "DOc Dob")]
+recueil.append[("J'ai du bon tabac", "DOn REn Min Don REn p Zc REn MIn FAn FAn Min Min")]

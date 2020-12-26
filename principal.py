@@ -32,12 +32,32 @@ def test_son_superposition():
 
 
 def ajout_partition():
+    global glob_recueil
+    partition="#à ajouter" \
+              "DO"
+    glob_recueil.append(partition)
+    return glob_recueil
+
+    #mise à jour de la liste des chansons
+    global glob_lbchanson
+    for element in glob_recueil:
+        (titre,part)=element
+        lb.insert(tk.END,titre)     #tk.END est une constante définie qu'on ajoute à la fin d'une liste
+    return glob_lbchanson
+
+
+
+def ecrire_partition(partition):
+    file=open("newpartitions.txt",'w') #'w' pour ouvert en écriture
+    file.write(partition)
+    file.close()
+
+
+def chaine_de_makov_v1():
     pass
 
-
-def ecrire_partition():
+def chaine_de_makov_v2():
     pass
-
 
 def vitesse():
     pass
@@ -66,19 +86,20 @@ def jouer_chanson():
 
 def mise_en_place_controles():
     global glob_racine,glob_transpo
-    #inversion
-    cb=tk.Checkbutton(text="inversion", variable=glob_inv)
-    cb.pack(side = tk.RIGHT)
-    glob_inv.set('0')
-    #transposition
-    le=tk.Label(text="Transposition")
-    le.pack(side = tk.RIGHT)
-    e=tk.Entry(textvariable=glob_transpo)
-    e.pack(side = tk.RIGHT)
+    # transposition
+    le = tk.Label(text="Transposition")
+    le.grid(row=0, column=2)
+    e = tk.Entry(width=3, textvariable=glob_transpo)
+    e.grid(row=0, column=1)
     glob_transpo.set('0')
+    # inversion
+    cb=tk.Checkbutton(text="inversion", variable=glob_inv)
+    cb.grid(row=1, column=1, columnspan=2)
+    glob_inv.set('0')
+
     #jouer
     bj=tk.Button(text="Jouer", command=jouer_chanson)
-    bj.pack(side = tk.RIGHT)
+    bj.grid(row=0, column=3)
 
 
 def mise_en_place_menus():
@@ -92,10 +113,10 @@ def mise_en_place_menus():
     menu_fichier.add_command(label="Quitter", command=glob_racine.quit)
     barre_menu.add_cascade(label="Fichiers", menu=menu_fichier)
 
-    menu_transfo = tk.Menu(barre_menu)
-    menu_transfo.add_command(label="Transposition", command=transposition)
-    menu_transfo.add_command(label="Inversion", command=inversion)
-    barre_menu.add_cascade(label="Transformation", menu=menu_transfo)
+    menu_markov = tk.Menu(barre_menu)
+    menu_markov.add_command(label="Version 1", command=chaine_de_makov_v1)
+    menu_markov.add_command(label="Version 2", command=chaine_de_makov_v2)
+    barre_menu.add_cascade(label="Chaines de Markov", menu=menu_markov)
 
     menu_avance = tk.Menu(barre_menu)
     menu_avance.add_command(label="Test son haut-parleurs", command=test_son_gauche_droite)
@@ -110,26 +131,24 @@ def mise_en_place_menus():
     menu_avance.add_command(label="Vitesse", command=vitesse)
     barre_menu.add_cascade(label="Avancé", menu=menu_avance)
 
-    menu_quitter = tk.Menu(barre_menu)
-    menu_quitter.add_command(label="Quitter", command=glob_racine.quit)
-    barre_menu.add_cascade(label="Quitter", menu=menu_quitter)
 
 def mise_en_place_canvas():
     global glob_canvas1, glob_canvas2
     glob_canvas1 = Canvas(width=600, height=50)
     glob_canvas2 = Canvas(width=600, height=300)
-    glob_canvas1.pack(side=tk.TOP)
-    glob_canvas2.pack(side=tk.BOTTOM)
+    glob_canvas1.grid(row=2, column=0, columnspan=4)
+    glob_canvas2.grid(row=3, column=0, columnspan=4)
 
 
 def joue_une_note(frequence, duree_musicale):
     global glob_po
     print(frequence)
     duree = (duree_musicale * 0.125) / 2        #une croche a une durée musicale de 2 et une durée réelle de 125ms
-    temps = np.linspace(0, duree, int(8000 * duree))  # temps est une liste de temps
+    sample_rate=8000
+    temps = np.linspace(0, duree, int(duree*sample_rate),False)  # temps est une liste de temps
     if frequence > 0:
         if glob_instrum.get() == "Sinus":
-            signal = np.sin(temps * 2 * pi * frequence)
+            signal = np.sin(frequence * temps * 2 * pi)     # 2*pi ==> (6) * np.pi
         elif glob_instrum.get() == "Rectangles":
             signal = np.sign(np.sin(temps * 2 * pi * frequence))
         elif glob_instrum.get() == "Orgue":
@@ -148,12 +167,27 @@ def joue_une_note(frequence, duree_musicale):
     # TO DO : https: // fr.wikipedia.org / wiki / Enveloppe_sonore
     enveloppe = np.exp(-temps * 3)
     signal = signal * enveloppe
+    dessine(signal)     #lorsqu'on est encore entre -1 et 1
 
-    sig_16b = (signal * 32767).astype(np.int16)  # signal sur 16 bits
+    maxi = np.max(np.abs(signal))
+    if maxi < 0:    #cas d'un signal nul = silence
+        maxi=1
+    signal *= 8388607 / maxi
+    signal = signal.astype(np.int32)  # signal sur 16 bits
+
+
+    i = 0
+    byte_array = []
+    for b in signal.tobytes():
+        if i % 4 != 3:
+            byte_array.append(b)
+        i += 1
+    audio = bytearray(byte_array)
+
+    glob_po = sa.play_buffer(audio, 1, 3, sample_rate)  # playobject
     if glob_po != 0:  # attente de la fin d'une éventuelle note précédente
         glob_po.wait_done()
-    dessine(signal)
-    glob_po = sa.play_buffer(sig_16b, 1, 2, 8000)  # playobject
+
     '''signal,
     nombre de canal : mono,
     nombre d'octets :2 octets = 16 bits,
@@ -191,7 +225,7 @@ def dessin2(signal):  # on lui passe le signal entre -1 et 1
         vertic = 149 * (1 - y) + 3
         glob_canvas2.create_line(i-1+9,vertic_pre, i+9, vertic, width=1, fill="blue")
         vertic_pre = vertic
-    # glob_canvas2.pack(side=tk.BOTTOM)      #surement utile sur PC
+        #surement utile sur PC
     # glob_canvas2.update_idletasks()
     glob_canvas2.update()
 
@@ -236,7 +270,7 @@ def dessin1(signal):
         vertical = 24 * (1 - y) + 3
         glob_canvas1.create_line(h - 1, vertical_pre, h, vertical, width=1, fill="blue")
         vertical_pre = vertical
-    # glob_canvas1.pack(side=tk.BOTTOM)      #sûrement utile sur PC
+         #sûrement utile sur PC
     # glob_canvas1.update_idletasks()
     glob_canvas1.update()
 
@@ -266,14 +300,16 @@ def lecture_fichier():
 
 def mise_en_place_liste_chansons():
     global glob_lbchanson, glob_recueil
-    lb = tk.Listbox(glob_racine, width=80, height=6,
+    lb = tk.Listbox(glob_racine, width=25, height=6,
                     selectmode=tk.SINGLE)
     for element in glob_recueil:
         (titre,part)=element
         lb.insert(tk.END,titre)     #tk.END est une constante définie qu'on ajoute à la fin d'une liste
     lb.select_set(0)                #défini la valeur par défaut
-    lb.pack(side = tk.TOP)
+    lb.grid(row=0, column=0)
     glob_lbchanson=lb
+    #print("global chanson: ", glob_lbchanson)
+    #print("global recueil: ", glob_recueil)
 
 
 mise_en_place_controles()

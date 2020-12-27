@@ -54,10 +54,15 @@ def ecrire_partition(partition):
 
 
 def chaine_de_makov_v1():
-    pass
+    print("Chaine de mrrkov v1")
+    print(creation_partition_v1(glob_recueil))
+    print(creation_duree_v1(glob_recueil))
+    print(noteduree_to_partition(creation_partition_v1(glob_recueil), creation_duree_v1(glob_recueil)))
 
 def chaine_de_makov_v2():
-    pass
+   print("chaine de markov v2")
+   print(creation_duree_v2(glob_recueil))
+   print(noteduree_to_partition(creation_partition_v2(glob_recueil), creation_duree_v2(glob_recueil)))
 
 def vitesse():
     pass

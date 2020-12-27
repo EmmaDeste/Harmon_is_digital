@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import random
 
 partition1 = "SOLc p Zc SOLn LAn SOLn DOn Zc SIb"

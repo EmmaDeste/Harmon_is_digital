@@ -12,7 +12,8 @@ def partition_to_noteduree(partition):
     l = partition.split(' ')
     n = []
     d = []
-    dico_n = {"DO": 0, "RE": 2, "MI": 4, "FA": 5, "SOL": 7, "LA": 9, "SI": 11, "Z": -1, "": -2}
+    dico_n = {"DO": 0, "DOD":1, "RE": 2, "RED":3, "MI": 4,
+              "FA": 5, "FAD": 6, "SOL": 7, "SOLD": 8, "LA": 9, "LAD": 10, "SI": 11, "Z": -1, "": -2}
     dico_d = {"c": 2, "n": 4, "b": 8, "r": 16}
     for x in l:
         note = ""
@@ -47,11 +48,13 @@ def noteduree_to_partition(note_c: list, duree_c: list) -> list:
     :return: partition lettrée
     """
     partition_l = ""
-    dico_n = {0: "DO", 2: "RE", 4: "MI", 5: "FA", 7: "SOL", 9: "LA", 11: "SI", -1: "Z"}
+    dico_n = {0: "DO", 1: "DOD", 2: "RE", 3: "RED", 4: "MI",
+              5: "FA", 6: "FAD", 7: "SOL", 8: "SOLD", 9: "LA", 10: "LAD", 11: "SI", -1: "Z"}  #D for dièse
     dico_d = {2: "c ", 3: "c p ", 4: "n ", 6: "n p ", 8: "b ", 12: "b p ", 16: "r ", 24: "r p "}
     for i in range(len(note_c)):
         nc = note_c[i]
         dc = duree_c[i]
+        print("nc= ",nc, " dc= ",dc)
         partition_l += dico_n[nc] + dico_d[dc]
     return partition_l[:-1]  # -1 pour enlever l'espace final
 

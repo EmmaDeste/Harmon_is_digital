@@ -57,19 +57,24 @@ def ajout_if_needed(chanson):
     #mise à jour de la liste des chansons
 
 
-def ecrire_partition(partition):
-    file=open("newpartitions.txt",'w') #'w' pour ouvert en écriture
-    file.write(partition)
+def ecrire_recueil():
+    global glob_recueil
+    file=open("partitions.txt", 'w', encoding="utf-8") #'w' pour ouvert en écriture
+    for chanson in glob_recueil:
+        (titre,part) = chanson
+        file.write(titre + "\n")
+        file.write(part + "\n")
     file.close()
 
 
-def chaine_de_makov_v1():
+
+def chaine_de_markov_v1():
     print("Chaine de mrrkov v1")
     print(creation_partition_v1(glob_recueil))
     print(creation_duree_v1(glob_recueil))
     print(noteduree_to_partition(creation_partition_v1(glob_recueil), creation_duree_v1(glob_recueil)))
 
-def chaine_de_makov_v2():
+def chaine_de_markov_v2():
    print("chaine de markov v2")
    print(creation_duree_v2(glob_recueil))
    print(noteduree_to_partition(creation_partition_v2(glob_recueil), creation_duree_v2(glob_recueil)))
@@ -134,13 +139,13 @@ def mise_en_place_menus():
     glob_racine.config(menu=barre_menu)
     menu_fichier = tk.Menu(barre_menu)
     menu_fichier.add_command(label="Ajouter un fichier de partitions", command=ajout_partition)
-    menu_fichier.add_command(label="Écrire un fichier partition", command=ecrire_partition)
+    menu_fichier.add_command(label="Écrire un fichier partition", command=ecrire_recueil)
     menu_fichier.add_command(label="Quitter", command=glob_racine.quit)
     barre_menu.add_cascade(label="Fichiers", menu=menu_fichier)
 
     menu_markov = tk.Menu(barre_menu)
-    menu_markov.add_command(label="Version 1", command=chaine_de_makov_v1)
-    menu_markov.add_command(label="Version 2", command=chaine_de_makov_v2)
+    menu_markov.add_command(label="Version 1", command=chaine_de_markov_v1)
+    menu_markov.add_command(label="Version 2", command=chaine_de_markov_v2)
     barre_menu.add_cascade(label="Chaines de Markov", menu=menu_markov)
 
     menu_avance = tk.Menu(barre_menu)
@@ -318,9 +323,7 @@ def lecture_fichier():
         line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)
         line2 = file.readline()
         line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
-        print(line1)
     file.close()
-    print(recueil)
     return recueil
 
 def mise_en_place_liste_chansons():

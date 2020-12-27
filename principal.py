@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from util_notes import *
 
 import tkinter as tk
@@ -34,15 +37,21 @@ def ajout_partition():
     pass
 
 def existe_titre(titre):
+    global glob_recueil
+    for chanson in glob_recueil:
+        if titre==chanson[0]:
+            return True
+    return False
 
 
 def ajout_if_needed(chanson):
     global glob_recueil, glob_lbchanson
     (titre, part) = chanson
-    glob_recueil.append(chanson)
-    glob_lbchanson.insert(tk.END, titre)  # tk.END est une constante définie qu'on ajoute à la fin d'une liste
-    glob_lbchanson.select_clear(0, tk.END)   #pour déselectionner
-    glob_lbchanson.select_set(tk.END)   #pour sélectionner le titre de la chanson en cours
+    if existe_titre(titre) == False :
+        glob_recueil.append(chanson)
+        glob_lbchanson.insert(tk.END, titre)  # tk.END est une constante définie qu'on ajoute à la fin d'une liste
+        glob_lbchanson.select_clear(0, tk.END)   #pour déselectionner
+        glob_lbchanson.select_set(tk.END)   #pour sélectionner le titre de la chanson en cours
     # TODO : vérifier si la chanson existe déjà, donc son titre
     # TODO : cohérence sur titre, chanson, partition
     #mise à jour de la liste des chansons
@@ -73,22 +82,32 @@ def jouer_chanson():
     global glob_lbchanson, glob_recueil
     num_chanson = glob_lbchanson.curselection()[0]
     print('num : ',num_chanson)
-    partition=glob_recueil[num_chanson][1]
-    (n,d)=partition_to_noteduree(partition)
+    partition = glob_recueil[num_chanson][1]
+    (n,d) = partition_to_noteduree(partition)
     print("n,d : ",n,d)
     tr=int(glob_transpo.get())
-    n=transposition(n,tr)
+    n=transposition(n, tr)
 
     inv=int(glob_inv.get())
     if inv==1:
         n=inversion(n)
 
-    ajout_if_needed(("#à ajouter",noteduree_to_partition(n,d)))
+    titre_chansonactuelle = glob_recueil[num_chanson][0]
+    ajout_if_needed((creation_de_titre(titre_chansonactuelle, inv, tr),noteduree_to_partition(n,d)))
     f=frequences(n)
     joue_des_notes(f,d)
 
     #joue_des_notes([220, -1, 440, 220], [1.5, 0.5, 1.3, 0.5])
     #joue_des_notes([220], [0.5])
+
+def creation_de_titre(titre_chansonactuelle, inv, tr):
+    res = titre_chansonactuelle
+    if inv==1:
+        res += " inversé"
+    if tr!=0:
+        res += " transposé de " + str(tr)
+    return res
+
 
 def mise_en_place_controles():
     global glob_racine,glob_transpo
@@ -324,7 +343,7 @@ glob_recueil=lecture_fichier()
 mise_en_place_liste_chansons()
 mise_en_place_canvas()
 glob_racine.mainloop()
-glob_racine.destroy()
+glob_racine.quit()
 
 
 #recueil.append[("Happy birthday", "DOc Dob")]

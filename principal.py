@@ -30,21 +30,22 @@ def test_son_gauche_droite():
 def test_son_superposition():
     fc.OverlappingCheck.run()
 
-
 def ajout_partition():
-    global glob_recueil
-    partition="#à ajouter" \
-              "DO"
-    glob_recueil.append(partition)
-    return glob_recueil
+    pass
 
+def existe_titre(titre):
+
+
+def ajout_if_needed(chanson):
+    global glob_recueil, glob_lbchanson
+    (titre, part) = chanson
+    glob_recueil.append(chanson)
+    glob_lbchanson.insert(tk.END, titre)  # tk.END est une constante définie qu'on ajoute à la fin d'une liste
+    glob_lbchanson.select_clear(0, tk.END)   #pour déselectionner
+    glob_lbchanson.select_set(tk.END)   #pour sélectionner le titre de la chanson en cours
+    # TODO : vérifier si la chanson existe déjà, donc son titre
+    # TODO : cohérence sur titre, chanson, partition
     #mise à jour de la liste des chansons
-    global glob_lbchanson
-    for element in glob_recueil:
-        (titre,part)=element
-        lb.insert(tk.END,titre)     #tk.END est une constante définie qu'on ajoute à la fin d'une liste
-    return glob_lbchanson
-
 
 
 def ecrire_partition(partition):
@@ -73,7 +74,7 @@ def jouer_chanson():
     num_chanson = glob_lbchanson.curselection()[0]
     print('num : ',num_chanson)
     partition=glob_recueil[num_chanson][1]
-    (n,d)=transformation(partition)
+    (n,d)=partition_to_noteduree(partition)
     print("n,d : ",n,d)
     tr=int(glob_transpo.get())
     n=transposition(n,tr)
@@ -82,8 +83,8 @@ def jouer_chanson():
     if inv==1:
         n=inversion(n)
 
+    ajout_if_needed(("#à ajouter",noteduree_to_partition(n,d)))
     f=frequences(n)
-    print("n,f,d : ",n,f,d)
     joue_des_notes(f,d)
 
     #joue_des_notes([220, -1, 440, 220], [1.5, 0.5, 1.3, 0.5])
@@ -92,10 +93,10 @@ def jouer_chanson():
 def mise_en_place_controles():
     global glob_racine,glob_transpo
     # transposition
-    le = tk.Label(text="Transposition")
-    le.grid(row=0, column=2)
+    le = tk.Label(text="transposition")
+    le.grid(row=0, column=2, sticky=tk.W)
     e = tk.Entry(width=3, textvariable=glob_transpo)
-    e.grid(row=0, column=1)
+    e.grid(row=0, column=1, sticky=tk.E)
     glob_transpo.set('0')
     # inversion
     cb=tk.Checkbutton(text="inversion", variable=glob_inv)
@@ -169,13 +170,13 @@ def joue_une_note(frequence, duree_musicale):
         signal = temps * 0.0
 
     # enveloppe : important pour différencier à l'oreille 2 même notes qui se suivent
-    # TO DO : https: // fr.wikipedia.org / wiki / Enveloppe_sonore
+    # TODO : https: // fr.wikipedia.org / wiki / Enveloppe_sonore
     enveloppe = np.exp(-temps * 3)
     signal = signal * enveloppe
     dessine(signal)     #lorsqu'on est encore entre -1 et 1
 
     maxi = np.max(np.abs(signal))
-    if maxi < 0:    #cas d'un signal nul = silence
+    if maxi <= 0:    #cas d'un signal nul = silence
         maxi=1
     signal *= 8388607 / maxi
     signal = signal.astype(np.int32)  # signal sur 16 bits
@@ -286,7 +287,7 @@ def dessine(signal):
 
 def lecture_fichier():
     recueil = []
-    file = open("partitions.txt","r")       #indicate "r"ead only
+    file = open("partitions.txt","r", encoding="utf-8")       #indicate "r"ead only
     line1 = file.readline()
     # https://qastack.fr/programming/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
     line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)   #+ veut dire qu'on remplace les caractères spéciaux présents au moins une fois
@@ -305,7 +306,7 @@ def lecture_fichier():
 
 def mise_en_place_liste_chansons():
     global glob_lbchanson, glob_recueil
-    lb = tk.Listbox(glob_racine, width=25, height=6,
+    lb = tk.Listbox(glob_racine, width=40, height=6,
                     selectmode=tk.SINGLE)
     for element in glob_recueil:
         (titre,part)=element
@@ -326,5 +327,5 @@ glob_racine.mainloop()
 glob_racine.destroy()
 
 
-recueil.append[("Happy birthday", "DOc Dob")]
-recueil.append[("J'ai du bon tabac", "DOn REn Min Don REn p Zc REn MIn FAn FAn Min Min")]
+#recueil.append[("Happy birthday", "DOc Dob")]
+#recueil.append[("J'ai du bon tabac", "DOn REn Min Don REn p Zc REn MIn FAn FAn Min Min")]

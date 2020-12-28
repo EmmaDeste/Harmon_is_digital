@@ -42,17 +42,16 @@ def partition_to_noteduree(partition):  #Emma : Une fonction read_sheet qui à p
         n.append(note)
         d.append(duree)
     nc = []
-    for s in n:
-        if dico_n[s] > -2:
-            nc.append(dico_n[s])
-    print("nc=", nc)
     dc = []
-    for s in d:
-        if s == "p":
+    for i in range(len(n)):
+        sn = n[i]
+        sd = d[i]
+        if sd == 'p' and dc!=[]:
             dc[-1] += dc[-1] // 2
         else:
-            dc.append(dico_d[s])
-    print("dc=", dc)
+            if sn in dico_n and sd in dico_d:
+                nc.append(dico_n[sn])
+                dc.append(dico_d[sd])
     return (nc, dc)
 
 
@@ -70,7 +69,6 @@ def noteduree_to_partition(note_c: list, duree_c: list) -> list:
     for i in range(len(note_c)):
         nc = note_c[i]
         dc = duree_c[i]
-        print("nc= ",nc, " dc= ",dc)
         partition_l += dico_n[nc] + dico_d[dc]
     return partition_l[:-1]  # -1 pour enlever l'espace final
 
@@ -127,22 +125,6 @@ def creation_duree_v2(l : list):
     :param l: collection of song (tuples: title/partition)
     :return: new partition of time
     """
-    occurs_c = 0
-    occurs_cp = 0
-    occurs_n = 0
-    occurs_np = 0
-    occurs_b = 0
-    occurs_bp = 0
-    occurs_r = 0
-    occurs_rd = 0
-    succ_c = []
-    succ_cp = []
-    succ_n = []
-    succ_np = []
-    succ_b = []
-    succ_bp = []
-    succ_r = []
-    succ_rp = []
     occur = [0] * 25  # https://stackoverflow.com/questions/8528178/list-of-zeros-in-python
     succ = []
     for i in range(25):
@@ -187,23 +169,6 @@ def creation_partition_v2(l: list):
     :param l: collection of song (tuples : title/partition
     :return: new partition of note
     """
-    global i
-    occurs_DO = 0
-    occurs_RE = 0
-    occurs_MI = 0
-    occurs_FA = 0
-    occurs_SOL = 0
-    occurs_LA = 0
-    occurs_SI = 0
-    occurs_Z = 0
-    succ_do = []
-    succ_re = []
-    succ_mi = []
-    succ_fa = []
-    succ_sol = []
-    succ_la = []
-    succ_si = []
-    succ_z = []
     occur = [0] * 12  # https://stackoverflow.com/questions/8528178/list-of-zeros-in-python
     succ = []
     for i in range(12):

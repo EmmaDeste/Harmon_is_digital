@@ -254,7 +254,9 @@ def markov_chain_v2():
     """
     global glob_collection
     print("Markov chain v2")
-    (nc, dc) = ([1,1,1,3,5,3,1],[2,2,2,2,2,2,4])  # simulation de l'appel à la fonction de Capucine
+    nc = creation_partition_v2(glob_collection)
+    dc = creation_duree_v2(glob_collection)
+    print("nc = ", nc, "dc= ", dc)
     title = "#" + str(len(glob_collection)) + " New musical rhythm of Markov2"
     markov_song_v2 = (title, noteduree_to_partition(nc, dc))
     addition_if_needed(markov_song_v2)

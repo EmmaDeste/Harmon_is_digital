@@ -8,118 +8,150 @@ from tkinter import Canvas
 
 import simpleaudio as sa
 import simpleaudio.functionchecks as fc
+
 import numpy as np
 from numpy import pi
 
 from math import sqrt
-import re      #expression régulière pour nettoyer les caractères spéciaux (ici le retour à la ligne)
 
-glob_racine = tk.Tk()
+import re      # regular expression to clean special characters (here carriage return)
+
+"""Creation of global variables"""
+glob_root = tk.Tk()
 glob_instrum = tk.StringVar()
-glob_inv=tk.StringVar()         #case inversion cochée ou non
+glob_inv = tk.StringVar()     # inversion ticked box or not
 glob_transpo = tk.StringVar()
-# Creation des variables globales
+glob_collection = []
 glob_canvas1 = 0
 glob_canvas2 = 0
 glob_po = 0
-glob_recueil=[]
-glob_lbchanson = 0
+glob_lbsong = 0
 
-def test_son_gauche_droite():
-    '''test son des haut-parleurs droit puis gauche'''
+def sound_test_loudspeakers():
+    """sound test on left and right loudspeakers"""
     fc.LeftRightCheck.run()
 
 
-def test_son_superposition():
+def sound_test_superposition():
+    """sound test on superposition of notes"""
     fc.OverlappingCheck.run()
 
 
-def existe_titre(titre):
-    global glob_recueil
-    for chanson in glob_recueil:
-        if titre==chanson[0]:
+def exists_title(title):
+    """
+    role: detect if a title already exists
+    :param title: title of the song
+    :return: boolean to know if the title given in parameter already exists
+    effect on the program: the global variable glob_collection will maybe have a song with a new title
+    """
+    global glob_collection
+    for song in glob_collection:
+        if title == song[0]:
             return True
     return False
 
 
-def ajout_if_needed(chanson):
-    global glob_recueil, glob_lbchanson
-    (titre, part) = chanson
-    if existe_titre(titre) == False :
-        glob_recueil.append(chanson)
-        glob_lbchanson.insert(tk.END, titre)  # tk.END est une constante définie qu'on ajoute à la fin d'une liste
-        glob_lbchanson.select_clear(0, tk.END)   #pour déselectionner
-        glob_lbchanson.select_set(tk.END)   #pour sélectionner le titre de la chanson en cours
-        glob_lbchanson.see(tk.END)          #pour amener l'ascenseur sur le titre sélectionner
-    # TODO : vérifier si la chanson existe déjà, donc son titre
-    # TODO : cohérence sur titre, chanson, partition
-    #mise à jour de la liste des chansons
-    ecrire_recueil()
+def addition_if_needed(song):
+    """
+    role:
+    :param song:
+    :return:
+    effect on the program:
+    """
+    global glob_collection, glob_lbsong
+    (title, part) = song
+    if exists_title(title) == False :
+        glob_collection.append(song)
+        glob_lbsong.insert(tk.END, title)    # tk.END is a defined constant that we add at the end of a list
+        glob_lbsong.select_clear(0, tk.END)  # to deselect all
+        glob_lbsong.select_set(tk.END)       # to select the title of the song going on
+        glob_lbsong.see(tk.END)              # to bring the scroll bar on the selected title
+    write_collection()   # to add the song to the collection
 
 
-def ecrire_recueil():
-    global glob_recueil
-    file=open("partitions.txt", 'w', encoding="utf-8") #'w' pour ouvert en écriture
-    for chanson in glob_recueil:
-        (titre,part) = chanson
-        file.write(titre + "\n")
+def write_collection():
+    """
+    role:
+    no param:
+    no return:
+    effect on the program:
+    """
+    global glob_collection
+    file = open("partitions.txt", 'w', encoding="utf-8") # 'w' open for writing
+    for song in glob_collection:
+        (title, part) = song
+        file.write(title + "\n")
         file.write(part + "\n")
     file.close()
 
 
+def markov_chain_v1():
+    """
+    role:
+    no param:
+    no return:
+    effect on the program:
+    """
+    print("Markov chain v1")
+    print(creation_partition_v1(glob_collection))
+    print(creation_duree_v1(glob_collection))
+    print(noteduree_to_partition(creation_partition_v1(glob_collection), creation_duree_v1(glob_collection)))
 
-def chaine_de_markov_v1():
-    print("Chaine de mrrkov v1")
-    print(creation_partition_v1(glob_recueil))
-    print(creation_duree_v1(glob_recueil))
-    print(noteduree_to_partition(creation_partition_v1(glob_recueil), creation_duree_v1(glob_recueil)))
-
-def chaine_de_markov_v2():
-   global glob_recueil
-   print("chaine de markov v2")
-   (nc,dc) = ([1,1,1,3,5,3,1],[2,2,2,2,2,2,4])  #simulation de l'appel à la fonction de Capucine
-   titre = "#" + str(len(glob_recueil)) + " Nouvelle comptine de Markov2"
-   chanson_de_markov_2 = (titre, noteduree_to_partition(nc, dc))
-   ajout_if_needed(chanson_de_markov_2)
+def markov_chain_v2():
+    """
+    role: 
+    no param: 
+    no return: 
+    effect on the program:
+    """
+    global glob_collection
+    print("Markov chain v2")
+    (nc, dc) = ([1,1,1,3,5,3,1],[2,2,2,2,2,2,4])  # simulation de l'appel à la fonction de Capucine
+    title = "#" + str(len(glob_collection)) + " New musical rhythm of Markov2"
+    markov_song_v2 = (title, noteduree_to_partition(nc, dc))
+    addition_if_needed(markov_song_v2)
 
 def vitesse():
+    # not sure we keep that
     pass
 
 
-def jouer_chanson():
-    global glob_lbchanson, glob_recueil
-    num_chanson = glob_lbchanson.curselection()[0]
-    print('num : ',num_chanson)
-    partition = glob_recueil[num_chanson][1]
-    (n,d) = partition_to_noteduree(partition)
-    print("n,d : ",n,d)
-    tr=int(glob_transpo.get())
-    n=transposition(n, tr)
+def play_song():
+    """
+    role:
+    no param:
+    no return:
+    effect on the program:
+    """
+    global glob_lbsong, glob_collection
+    song_num = glob_lbsong.curselection()[0]
+    partition = glob_collection[song_num][1]
+    (n, d) = partition_to_noteduree(partition)
+    tr = int(glob_transpo.get())
+    n = transposition(n, tr)
 
-    inv=int(glob_inv.get())
-    if inv==1:
-        n=inversion(n)
+    inv = int(glob_inv.get())
+    if inv == 1:
+        n = inversion(n)
 
-    titre_chansonactuelle = glob_recueil[num_chanson][0]
-    ajout_if_needed((creation_de_titre(titre_chansonactuelle, inv, tr),noteduree_to_partition(n,d)))
+    title_current_song = glob_collection[song_num][0]
+    addition_if_needed((creation_de_title(title_current_song, inv, tr),noteduree_to_partition(n,d)))
 
-    f=frequences(n)
-    joue_des_notes(f,d)
+    f = frequences(n)
+    play_notes(f, d)
 
-    #joue_des_notes([220, -1, 440, 220], [1.5, 0.5, 1.3, 0.5])
-    #joue_des_notes([220], [0.5])
 
-def creation_de_titre(titre_chansonactuelle, inv, tr):
-    res = titre_chansonactuelle
-    if inv==1:
-        res += " inversé"
-    if tr!=0:
-        res += " transposé de " + str(tr)
+def title_creation(title_current_song, inv, tr):
+    res = title_current_song
+    if inv == 1:
+        res += " reverse"
+    if tr != 0:
+        res += " transposed of " + str(tr)
     return res
 
 
-def mise_en_place_controles():
-    global glob_racine,glob_transpo
+def controls_settings():
+    global glob_root, glob_transpo
     # transposition
     le = tk.Label(text="transposition")
     le.grid(row=0, column=2, sticky=tk.W)
@@ -132,36 +164,36 @@ def mise_en_place_controles():
     glob_inv.set('0')
 
     #jouer
-    bj=tk.Button(text="Jouer", command=jouer_chanson)
+    bj=tk.Button(text="Play", command=play_song())
     bj.grid(row=0, column=3)
 
 
-def mise_en_place_menus():
-    global glob_racine
-    glob_racine.title("Capucine and Emma")
-    barre_menu = tk.Menu(glob_racine)
-    glob_racine.config(menu=barre_menu)
+def menus_settings():
+    global glob_root
+    glob_root.title("Capucine and Emma")
+    menu_bar = tk.Menu(glob_root)
+    glob_root.config(menu=menu_bar)
 
-    menu_markov = tk.Menu(barre_menu)
+    menu_markov = tk.Menu(menu_bar)
     menu_markov.add_command(label="Version 1", command=chaine_de_markov_v1)
     menu_markov.add_command(label="Version 2", command=chaine_de_markov_v2)
-    barre_menu.add_cascade(label="Chaines de Markov", menu=menu_markov)
+    menu_bar.add_cascade(label="Markov chains", menu=menu_markov)
 
-    menu_avance = tk.Menu(barre_menu)
-    menu_avance.add_command(label="Test son haut-parleurs", command=test_son_gauche_droite)
-    menu_avance.add_command(label="Test son en superposition", command=test_son_superposition)
+    menu_avance = tk.Menu(menu_bar)
+    menu_avance.add_command(label="Sound test loudspeakers", command=sound_test_loudspeakers())
+    menu_avance.add_command(label="Sound test superposition", command=sound_test_superposition())
     menu_avance.add_separator()
     menu_avance.add_radiobutton(label="Instrument: sinus", var=glob_instrum, value="Sinus")
     menu_avance.add_radiobutton(label="Instrument: rectangles", var=glob_instrum, value="Rectangles")
-    menu_avance.add_radiobutton(label="Instrument: orgue", var=glob_instrum, value="Orgue")
-    menu_avance.add_radiobutton(label="Instrument: ovni", var=glob_instrum, value="Ovni")
-    glob_instrum.set("Sinus")
+    menu_avance.add_radiobutton(label="Instrument: organ", var=glob_instrum, value="Organ")
+    menu_avance.add_radiobutton(label="Instrument: UFO", var=glob_instrum, value="UFO")
+    glob_instrum.set("Sinus")  #set the default value
     menu_avance.add_separator()
-    menu_avance.add_command(label="Vitesse", command=vitesse)
-    barre_menu.add_cascade(label="Avancé", menu=menu_avance)
+    menu_avance.add_command(label="Speed", command=vitesse)
+    menu_bar.add_cascade(label="Advanced", menu=menu_avance)
 
 
-def mise_en_place_canvas():
+def canvas_settings():
     global glob_canvas1, glob_canvas2
     glob_canvas1 = Canvas(width=600, height=50)
     glob_canvas2 = Canvas(width=600, height=300)
@@ -169,7 +201,7 @@ def mise_en_place_canvas():
     glob_canvas2.grid(row=3, column=0, columnspan=4)
 
 
-def joue_une_note(frequence, duree_musicale):
+def play_note(frequence, duree_musicale):
     global glob_po
     print(frequence)
     duree = (duree_musicale * 0.125) / 2        #une croche a une durée musicale de 2 et une durée réelle de 125ms
@@ -180,10 +212,10 @@ def joue_une_note(frequence, duree_musicale):
             signal = np.sin(frequence * temps * 2 * pi)     # 2*pi ==> (6) * np.pi
         elif glob_instrum.get() == "Rectangles":
             signal = np.sign(np.sin(temps * 2 * pi * frequence))
-        elif glob_instrum.get() == "Orgue":
+        elif glob_instrum.get() == "Organ":
             signal = 0.4 * (np.sin(temps * 2 * pi * frequence)) + 0.5 * (
                 np.sin(temps * 2 * pi * (frequence / 4))) + 0.1 * (np.sin(temps * 2 * pi * (frequence * 4)))
-        elif glob_instrum.get() == "Ovni":
+        elif glob_instrum.get() == "UFO":
             signal = 0.2 * (np.sin(temps * 2 * pi * frequence)) + 0.4 * (
                 np.sin(temps * 2 * pi * (frequence / sqrt(2)))) + 0.4 * (np.sin(temps * 2 * pi * (frequence * sqrt(2))))
         else:
@@ -260,9 +292,9 @@ def dessin2(signal):  # on lui passe le signal entre -1 et 1
     glob_canvas2.update()
 
 
-def joue_des_notes(frequence, duree):
+def play_notes(frequence, duree):
     for i in range(len(frequence)):
-        joue_une_note(frequence[i], duree[i])
+        play_note(frequence[i], duree[i])
 
 
 def dessin1(signal):
@@ -310,7 +342,7 @@ def dessine(signal):
     dessin2(signal)
 
 def lecture_fichier():  #Une fonction read_line_file(f, num) qui prend en paramètres un nom de fichier et un numéro de ligne et qui retourne le contenu de la ligne en question.
-    recueil = []
+    collection = []
     file = open("partitions.txt","r", encoding="utf-8")       #indicate "r"ead only
     line1 = file.readline()
     # https://qastack.fr/programming/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
@@ -318,36 +350,32 @@ def lecture_fichier():  #Une fonction read_line_file(f, num) qui prend en param�
     line2 = file.readline()
     line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
     while line1 != "":             #pour éviter les fins de lignes et fin de fichier, spécial sur Mac
-        recueil.append((line1, line2))  # le dernier caractère de line est un passage à la ligne
+        collection.append((line1, line2))  # le dernier caractère de line est un passage à la ligne
         line1 = file.readline()     # /!/ fin de ligne n'est pas codé pareil sur Mac et Windows
         line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)
         line2 = file.readline()
         line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
     file.close()
-    return recueil
+    return collection
 
-def mise_en_place_liste_chansons():
-    global glob_lbchanson, glob_recueil
-    lb = tk.Listbox(glob_racine, width=40, height=6,
+def setting_songs_list():
+    global glob_lbsong, glob_collection
+    lb = tk.Listbox(glob_root, width=40, height=6,
                     selectmode=tk.SINGLE)
-    for element in glob_recueil:
-        (titre,part)=element
-        lb.insert(tk.END,titre)     #tk.END est une constante définie qu'on ajoute à la fin d'une liste
+    for element in glob_collection:
+        (title,part)=element
+        lb.insert(tk.END,title)     #tk.END est une constante définie qu'on ajoute à la fin d'une liste
     lb.select_set(0)                #défini la valeur par défaut
     lb.grid(row=0, column=0)
-    glob_lbchanson=lb
-    #print("global chanson: ", glob_lbchanson)
-    #print("global recueil: ", glob_recueil)
+    glob_lbsong = lb
 
 
-mise_en_place_controles()
-mise_en_place_menus()
-glob_recueil=lecture_fichier()
-mise_en_place_liste_chansons()
-mise_en_place_canvas()
-glob_racine.mainloop()
-glob_racine.quit()
+controls_settings()
+menus_settings()
+glob_collection=lecture_fichier()
+setting_songs_list()
+canvas_settings()
+glob_root.mainloop()
+glob_root.quit()
 
 
-#recueil.append[("Happy birthday", "DOc Dob")]
-#recueil.append[("J'ai du bon tabac", "DOn REn Min Don REn p Zc REn MIn FAn FAn Min Min")]

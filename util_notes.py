@@ -1,6 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+"""
+Project: Harmony is digital
+Authors: Capucine Foucher and Emma Desté
+Promo: EFREI 2025
+Role: this is the file containing :
+- decode and uncode partition,
+- associate frequencies to notes,
+- transposition,
+- inversion,
+- creation of new songs using Markov chains
+"""
+
 import random
 
 partition1 = "SOLc p Zc SOLn LAn SOLn DOn Zc SIb"

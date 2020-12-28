@@ -33,8 +33,6 @@ def test_son_gauche_droite():
 def test_son_superposition():
     fc.OverlappingCheck.run()
 
-def ajout_partition():
-    pass
 
 def existe_titre(titre):
     global glob_recueil
@@ -52,9 +50,11 @@ def ajout_if_needed(chanson):
         glob_lbchanson.insert(tk.END, titre)  # tk.END est une constante définie qu'on ajoute à la fin d'une liste
         glob_lbchanson.select_clear(0, tk.END)   #pour déselectionner
         glob_lbchanson.select_set(tk.END)   #pour sélectionner le titre de la chanson en cours
+        glob_lbchanson.see(tk.END)          #pour amener l'ascenseur sur le titre sélectionner
     # TODO : vérifier si la chanson existe déjà, donc son titre
     # TODO : cohérence sur titre, chanson, partition
     #mise à jour de la liste des chansons
+    ecrire_recueil()
 
 
 def ecrire_recueil():
@@ -75,9 +75,12 @@ def chaine_de_markov_v1():
     print(noteduree_to_partition(creation_partition_v1(glob_recueil), creation_duree_v1(glob_recueil)))
 
 def chaine_de_markov_v2():
+   global glob_recueil
    print("chaine de markov v2")
-   print(creation_duree_v2(glob_recueil))
-   print(noteduree_to_partition(creation_partition_v2(glob_recueil), creation_duree_v2(glob_recueil)))
+   (nc,dc) = ([1,1,1,3,5,3,1],[2,2,2,2,2,2,4])  #simulation de l'appel à la fonction de Capucine
+   titre = "#" + str(len(glob_recueil)) + " Nouvelle comptine de Markov2"
+   chanson_de_markov_2 = (titre, noteduree_to_partition(nc, dc))
+   ajout_if_needed(chanson_de_markov_2)
 
 def vitesse():
     pass
@@ -99,6 +102,7 @@ def jouer_chanson():
 
     titre_chansonactuelle = glob_recueil[num_chanson][0]
     ajout_if_needed((creation_de_titre(titre_chansonactuelle, inv, tr),noteduree_to_partition(n,d)))
+
     f=frequences(n)
     joue_des_notes(f,d)
 
@@ -137,11 +141,6 @@ def mise_en_place_menus():
     glob_racine.title("Capucine and Emma")
     barre_menu = tk.Menu(glob_racine)
     glob_racine.config(menu=barre_menu)
-    menu_fichier = tk.Menu(barre_menu)
-    menu_fichier.add_command(label="Ajouter un fichier de partitions", command=ajout_partition)
-    menu_fichier.add_command(label="Écrire un fichier partition", command=ecrire_recueil)
-    menu_fichier.add_command(label="Quitter", command=glob_racine.quit)
-    barre_menu.add_cascade(label="Fichiers", menu=menu_fichier)
 
     menu_markov = tk.Menu(barre_menu)
     menu_markov.add_command(label="Version 1", command=chaine_de_markov_v1)
@@ -215,6 +214,7 @@ def joue_une_note(frequence, duree_musicale):
     audio = bytearray(byte_array)
 
     glob_po = sa.play_buffer(audio, 1, 3, sample_rate)  # playobject
+    #Une fonction play_sheet qui à partir d’une séquence de fréquences et de durées, appelle les fonctions sound et sleep pour lire la partition musicale ??
     if glob_po != 0:  # attente de la fin d'une éventuelle note précédente
         glob_po.wait_done()
 
@@ -309,7 +309,7 @@ def dessine(signal):
     dessin1(signal)
     dessin2(signal)
 
-def lecture_fichier():
+def lecture_fichier():  #Une fonction read_line_file(f, num) qui prend en paramètres un nom de fichier et un numéro de ligne et qui retourne le contenu de la ligne en question.
     recueil = []
     file = open("partitions.txt","r", encoding="utf-8")       #indicate "r"ead only
     line1 = file.readline()

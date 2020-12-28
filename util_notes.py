@@ -5,8 +5,9 @@ import random
 
 partition1 = "SOLc p Zc SOLn LAn SOLn DOn Zc SIb"
 
+#Emma : fonction calc_duration(figures, d0) qui prend en entrée la liste des 4 figures et la durée de la croche d0. Elle calcule les durées des autres figures et retourne un dictionnaire associant à chaque figure une durée.??
 
-def partition_to_noteduree(partition):
+def partition_to_noteduree(partition):  #Emma : Une fonction read_sheet qui à partir d’une ligne du fichier extrait les notes, les figures, les silences et les points de prolongation et construit une séquence de fréquences et de durée qu’elle retourne en sortie.??
     """
 
     :param partition: partition en toutes lettres à transformer
@@ -94,7 +95,7 @@ def inversion(p):
     return i
 
 
-def frequences(l):
+def frequences(l):   #Emma : est-ce qu'on remplace par la fonction calc_frequency(notes, frequences) qui prend en entrée une liste de notes et une liste de fréquences et qui retourne une variable de type dictionnaire associant à chaque note une fréquence ??
     """
 
     :param l: list des notes chiffrées

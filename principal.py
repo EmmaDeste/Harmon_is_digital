@@ -52,7 +52,7 @@ glob_croche_dur_sv = tk.StringVar()  # input area for the croche duration in ms,
 
 def sound_test_loudspeakers():
     """ Emmma
-    role: sound test on left and right loudspeakers
+    Sound test on left and right loudspeakers
     no param:
     no return: drive the audio output
     effect on the program: audible sound played
@@ -62,7 +62,7 @@ def sound_test_loudspeakers():
 
 def sound_test_superposition():
     """ Emmma
-    role: sound test on superposition of notes
+    Sound test on superposition of notes
     no param:
     no return: drive the audio output
     effect on the program: audible sound played
@@ -72,9 +72,9 @@ def sound_test_superposition():
 
 def play_note(frequence, musical_duration):
     """
-    role: create the sound of a note based on its frequency, its duration and the instrument used
-    :param frequence: frequency in Hertz
-    :param musical_duration: duration of a note, e.g. 2 for croche, 16 for ronde
+    Create the sound of a note based on its frequency, its duration and the instrument used
+    :param int frequence: frequency in Hertz
+    :param int musical_duration: duration of a note, e.g. 2 for croche, 16 for ronde
     no return: drive the audio output
     effect on the program: audible sound played
     """
@@ -126,11 +126,11 @@ def play_note(frequence, musical_duration):
 
 def play_notes(frequence, duration):
     """ Emmma
-    role: create the sound of each notes based on its frequency and its duration using the function play_note
-    :param frequence: frequency in Hertz
-    :param duration: duration of a note
+    Create the sound of each notes based on its frequency and its duration using the function play_note
+    :param int frequence: frequency in Hertz
+    :param int duration: duration of a note
     no return: drive the audio output
-    effect on the program: song sound played
+    effect on the program: sound of notes played
     """
     for i in range(len(frequence)):
         play_note(frequence[i], duration[i])
@@ -140,9 +140,10 @@ def play_notes(frequence, duration):
 
 def exists_title(title):
     """ Emmma
-    role: detects if a title already exists in the collection
-    :param title: title of the song
-    :return: boolean to know if the title given in parameter already exists
+    Detects if a title already exists in the collection
+    :param str title: title of the song
+    :return: if the title given in parameter already exists
+    :rtype: boolean
     effect on the program: the function will tell to addition_if_needed if a new title appears
     """
     global glob_collection
@@ -154,8 +155,8 @@ def exists_title(title):
 
 def addition_if_needed(song):
     """ Emmma
-    role: detect a new song and add it in the collection, add its title in the listbox and and place the cursor on it
-    :param song: song containing (titre, partition)
+    Detect a new song and add it in the collection, add its title in the listbox and and place the cursor on it
+    :param tuple song: song containing (titre, partition)
     no return: indicate to other functions if a song has to be added
     effect on the program: update the list of songs and the collection
     """
@@ -172,9 +173,10 @@ def addition_if_needed(song):
 
 def file_reading(file_name):
     """ Emmma
-    role: create a collection of songs by reading by pairs of lines the file
-    :param file_name: name of the file that has to be red
+    Create a collection of songs by reading by pairs of lines the file
+    :param str file_name: name of the file that has to be red
     :return collection: collection of the songs contained in the file
+    :rtype: list
     effect on the program: create a collection of songs
     """
     collection = []
@@ -198,7 +200,7 @@ def file_reading(file_name):
 
 def write_collection():
     """ Emmma
-    role: create a text file with the collection of songs by writing by pairs of lines
+    Create a text file with the collection of songs by writing by pairs of lines
     no param:
     no return: create and write in a file separately
     effect on the program: available file containing collection of songs
@@ -214,11 +216,12 @@ def write_collection():
 
 def title_creation(title_current_song, inv, tr):
     """ Emmma
-    role: create a title for a new song based on the title of the current song
-    :param title_current_song: title of the current song
-    :param inv: ticked box or not
-    :param tr: value of the transposition
+    Create a title for a new song based on the title of the current song
+    :param str title_current_song: title of the current song
+    :param int inv: ticked box or not
+    :param int tr: value of the transposition
     :return res: the new title
+    :rtype: str
     effect on the program: new songs have a fitting title
     """
     res = title_current_song
@@ -231,13 +234,12 @@ def title_creation(title_current_song, inv, tr):
 
 def set_croche_duration(duration):
     """ Emmma
-    role:
-    :param duration: string, duration of a note
-    no return:
-    effect on the program:
+    Calculate the value of the duration of a croche
+    :param str duration: duration of a note
+    no return: give the speed to the function play_song
+                only has an effect on glob_croche_duration
+    effect on the program: give the speed of the song
     """
-    # duration in string
-    # pas de return parce que seulement effet de bord sur glob_croche_duration
     global glob_croche_duration
     # https://stackoverflow.com/questions/1265665/how-can-i-check-if-a-string-represents-an-int-without-using-try-except
     if duration.isdigit():
@@ -249,13 +251,12 @@ def set_croche_duration(duration):
 # Functions to be called by graphical interface
 
 def markov_chain_v1():
-    """
-    role:
+    """ Emmma
+    Creation of a new musical rhythm using Markov chain version 1 with the functions creation_partition_1 and creation_duree_v1
     no param:
     no return:
     effect on the program:
     """
-    print("Markov chain v1")
     nc = creation_partition_v1(glob_collection)
     dc = creation_duree_v1(glob_collection)
     title = "#" + str(len(glob_collection)) + " New musical rhythm of Markov1"
@@ -264,14 +265,12 @@ def markov_chain_v1():
 
 
 def markov_chain_v2():
-    """
-    role: 
+    """ Emmma
+    Creation of a new musical rhythm using Markov chain version 2
     no param: 
     no return: 
     effect on the program:
     """
-    global glob_collection
-    print("Markov chain v2")
     nc = creation_partition_v2(glob_collection)
     dc = creation_duree_v2(glob_collection)
     title = "#" + str(len(glob_collection)) + " New musical rhythm of Markov2"
@@ -280,11 +279,11 @@ def markov_chain_v2():
 
 
 def play_song():
-    """
-    role:
+    """ Emmma
+    Create the sound of a song
     no param:
-    no return:
-    effect on the program:
+    no return: drive the audio output
+    effect on the program: sound of the song played
     """
     song_num = glob_lbsong.curselection()[0]
     partition = glob_collection[song_num][1]
@@ -300,17 +299,16 @@ def play_song():
     addition_if_needed((title_creation(title_current_song, inv, tr), noteduree_to_partition(n, d)))
 
     set_croche_duration(glob_croche_dur_sv.get())
-    print("glob_croche_duration : ", glob_croche_duration, "glob_croche_dur_sv : ", glob_croche_dur_sv.get())
 
     f = frequences(n)
     play_notes(f, d)
 
 
 def setting_songs_list():
-    """
-    role:
+    """ Emmma
+    Display the list of songs on the screen using the collection
     no param:
-    no return:
+    no return: drive on the graphic interface
     effect on the program:
     """
     global glob_lbsong, glob_collection
@@ -327,11 +325,12 @@ def setting_songs_list():
 # Graphical interface functions using Tkinter
 
 def controls_settings():
-    """
-    role:
+    """ Emmma
+    Setting up a cell to enter the value of the transposition, a box to ticked for an inversion,
+    a cell to enter the value of the duration of a croche, the button to play
     no param:
-    no return:
-    effect on the program:
+    no return: drive on the graphic interface
+    effect on the program: set the graphic interface to transform the play of a partition
     """
     global glob_root, glob_transpo
     # transposition
@@ -360,10 +359,10 @@ def controls_settings():
 
 def menus_settings():
     """
-    role:
+    Setting up the menus to choose to use the Markov chains, to test the loudspeakers and to use different instruments
     no param:
-    no return:
-    effect on the program:
+    no return: drive on the graphic interface
+    effect on the program: set the graphic interface to transform the play of a partition
     """
     global glob_root
     glob_root.title("Capucine and Emma")
@@ -388,6 +387,12 @@ def menus_settings():
 
 
 def canvas_settings():
+    """
+    Define two Canvas to have an area dedicaded to the drawings
+    no parameter:
+    no return: drive on the graphic interface
+    impact of the program: signals could be draw in these two areas
+    """
     global glob_canvas1, glob_canvas2
     glob_canvas1 = Canvas(width=600, height=50)
     glob_canvas2 = Canvas(width=600, height=300)
@@ -397,9 +402,10 @@ def canvas_settings():
 
 def drawing1(signal):
     """
-    role:
-    :param signal:
-    no return:
+    Draw the general signal of a note on a coordinate system
+    :param np.array signal: signal of a note
+    no return: drive on the graphic interface
+    effect on the program: display a drawing of the signal attitude
     """
     glob_canvas1.delete("all")
     # horizontal axis
@@ -437,12 +443,12 @@ def drawing1(signal):
         vertical_pre = vertical
     glob_canvas1.update()  # useful for PC ??
 
-
 def drawing2(signal):
     """
-    role:
-    :param signal: signal between -1 and 1
-    no return:
+    Draw the signal of the beginning of a note on a coordinate system
+    :param np.array signal: signal between -1 and 1
+    no return: drive on the graphic interface
+    effect on the program: display a drawing of the beginning of signal
     """
     glob_canvas2.delete("all")
     # horizontal axis

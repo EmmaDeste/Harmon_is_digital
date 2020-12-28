@@ -31,10 +31,10 @@ import re  # regular expression to clean special characters (here carriage retur
 # Creation of global variables
 # Simpleaudio variables
 glob_po = 0  # simpleaudio playable object
-sample_rate = 8000  # audio signal is sliced 8000 times per second
+sample_rate = 44100  # audio signal is sliced 44100 times per second
 
 # General usage global variable
-glob_collection = [] # all songs in a list of [(tile1, partition1),(title2, partition2),...]
+glob_collection = []  # all songs in a list of [(tile1, partition1),(title2, partition2),...]
 glob_croche_duration = 0.125  # a croche has a musical duration of 125ms, linked to glob_croche_dur_sv
 
 # Graphic interface variables
@@ -51,30 +51,40 @@ glob_croche_dur_sv = tk.StringVar()  # input area for the croche duration in ms,
 # Simpleaudio functions
 
 def sound_test_loudspeakers():
-    """sound test on left and right loudspeakers"""
+    """ Emmma
+    role: sound test on left and right loudspeakers
+    no param:
+    no return: drive the audio output
+    effect on the program: audible sound played
+    """
     fc.LeftRightCheck.run()
 
 
 def sound_test_superposition():
-    """sound test on superposition of notes"""
+    """ Emmma
+    role: sound test on superposition of notes
+    no param:
+    no return: drive the audio output
+    effect on the program: audible sound played
+    """
     fc.OverlappingCheck.run()
 
 
 def play_note(frequence, musical_duration):
     """
-    role:
-    :param frequence:
-    :param musical_duration:
-    no return:
-    effect on the program:
+    role: create the sound of a note based on its frequency, its duration and the instrument used
+    :param frequence: frequency in Hertz
+    :param musical_duration: duration of a note, e.g. 2 for croche, 16 for ronde
+    no return: drive the audio output
+    effect on the program: audible sound played
     """
     global glob_po
-    print(frequence)
-    duration = (musical_duration * glob_croche_duration) / 2  # croche has a musical duration of 2
+    duration = (musical_duration * glob_croche_duration) / 2  # code duration of croche is 2
     time = np.linspace(0, duration, int(duration * sample_rate), False)  # time is a list of time
+                                                               # False because we want 1/sample_rate between each value
     if frequence > 0:
         if glob_instrum.get() == "Sinus":
-            signal = np.sin(frequence * time * 2 * pi)  # Emma: 2*pi ==> (6) * np.pi
+            signal = np.sin(frequence * time * 2 * pi)
         elif glob_instrum.get() == "Rectangles":
             signal = np.sign(np.sin(time * 2 * pi * frequence))
         elif glob_instrum.get() == "Organ":
@@ -86,58 +96,54 @@ def play_note(frequence, musical_duration):
         else:
             print("Erreur : instrument inconnu")
             return
-    else:
-        signal = time * 0.0
+    else:  # to play nothing (silence)
+        signal = time * 0.0  # to generate a flat signal
 
     # envelope : important to differentiate two following same notes (with ears)
-    # TODO : https: // fr.wikipedia.org / wiki / Enveloppe_sonore
+    # TODO improved envelope using https: // fr.wikipedia.org / wiki / Enveloppe_sonore
     envelope = np.exp(-time * 3)
     signal = signal * envelope
     draw(signal)  # when we are between -1 and 1
 
-    maxi = np.max(np.abs(signal))
-    if maxi <= 0:  # case of null signal : silence
-        maxi = 1
-    signal *= 8388607 / maxi
-    signal = signal.astype(np.int32)  # signal sur 16 bits
+    tone = signal * 8388607  # 8388607 = 2^23 : to stretch -1,1 to 24 bits
+    tone = tone.astype(np.int32)  # transform list of floats to list of integers on 32 bits
 
     i = 0
     byte_array = []
-    for b in signal.tobytes():
-        if i % 4 != 3:
+    for b in tone.tobytes():
+        if i % 4 != 3:  # to keep only 3  bytes on 4
             byte_array.append(b)
         i += 1
     audio = bytearray(byte_array)
 
     glob_po = sa.play_buffer(audio, 1, 3, sample_rate)  # playobject
-    # Emma: Une fonction play_sheet qui à partir d’une séquence de fréquences et de durées, appelle les fonctions sound et sleep pour lire la partition musicale ??
+    # 1 = number of audio channel : mono,
+    # 3 = number of bytes : 3 bytes = 24 bits
+
     if glob_po != 0:  # wait for the end of a potential previous note
         glob_po.wait_done()
 
-    '''signal,
-    nombre de canal : mono,
-    nombre d'octets :2 octets = 16 bits,
-    fréquence d'échantillonage")'''
-
 
 def play_notes(frequence, duration):
-    """
-    role:
-    :param frequence:
-    :param duration:
-    no return:
+    """ Emmma
+    role: create the sound of each notes based on its frequency and its duration using the function play_note
+    :param frequence: frequency in Hertz
+    :param duration: duration of a note
+    no return: drive the audio output
+    effect on the program: song sound played
     """
     for i in range(len(frequence)):
         play_note(frequence[i], duration[i])
 
+
 # General usage functions
 
 def exists_title(title):
-    """
-    role: detect if a title already exists
+    """ Emmma
+    role: detects if a title already exists in the collection
     :param title: title of the song
     :return: boolean to know if the title given in parameter already exists
-    effect on the program: the global variable glob_collection will maybe have a song with a new title
+    effect on the program: the function will tell to addition_if_needed if a new title appears
     """
     global glob_collection
     for song in glob_collection:
@@ -147,30 +153,73 @@ def exists_title(title):
 
 
 def addition_if_needed(song):
-    """
-    role:
-    :param song:
-    :return:
-    effect on the program:
+    """ Emmma
+    role: detect a new song and add it in the collection, add its title in the listbox and and place the cursor on it
+    :param song: song containing (titre, partition)
+    no return: indicate to other functions if a song has to be added
+    effect on the program: update the list of songs and the collection
     """
     global glob_collection, glob_lbsong
     (title, part) = song
-    if exists_title(title) == False :
+    if exists_title(title) == False:
         glob_collection.append(song)
-        glob_lbsong.insert(tk.END, title)    # tk.END is a defined constant that we add at the end of a list
+        glob_lbsong.insert(tk.END, title)  # tk.END is a defined constant that we add at the end of a list
         glob_lbsong.select_clear(0, tk.END)  # to deselect all
-        glob_lbsong.select_set(tk.END)       # to select the title of the song going on
-        glob_lbsong.see(tk.END)              # to bring the scroll bar on the selected title
-    write_collection()   # to add the song to the collection
+        glob_lbsong.select_set(tk.END)  # to select the title of the song going on
+        glob_lbsong.see(tk.END)  # to bring the scroll bar on the selected title
+    write_collection()  # to add the song to the collection
+
+
+def file_reading(file_name):
+    """ Emmma
+    role: create a collection of songs by reading by pairs of lines the file
+    :param file_name: name of the file that has to be red
+    :return collection: collection of the songs contained in the file
+    effect on the program: create a collection of songs
+    """
+    collection = []
+    file = open(file_name, "r", encoding="utf-8")  # indicate "r"ead only
+    line1 = file.readline()
+    # https://qastack.fr/programming/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
+    line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '',
+                   line1)  # + means it replace special characters present at least once
+    line2 = file.readline()
+    line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
+    while line2 != "":  # to avoid end of lines and end of files, specific for Mac
+        collection.append((line1,
+                           line2))  # the last character of the line is a carriage return. /!\ carriage return has a different coding on Windows and on Mac
+        line1 = file.readline()
+        line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)
+        line2 = file.readline()
+        line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
+    file.close()
+    return collection
+
+
+def write_collection():
+    """ Emmma
+    role: create a text file with the collection of songs by writing by pairs of lines
+    no param:
+    no return: create and write in a file separately
+    effect on the program: available file containing collection of songs
+    """
+    global glob_collection
+    file = open("partitions.txt", 'w', encoding="utf-8")  # 'w' open for writing
+    for song in glob_collection:
+        (title, part) = song
+        file.write(title + "\n")
+        file.write(part + "\n")
+    file.close()
 
 
 def title_creation(title_current_song, inv, tr):
-    """
-    role:
-    :param title_current_song:
-    :param inv:
-    :param tr:
-    :return res:
+    """ Emmma
+    role: create a title for a new song based on the title of the current song
+    :param title_current_song: title of the current song
+    :param inv: ticked box or not
+    :param tr: value of the transposition
+    :return res: the new title
+    effect on the program: new songs have a fitting title
     """
     res = title_current_song
     if inv == 1:
@@ -181,6 +230,12 @@ def title_creation(title_current_song, inv, tr):
 
 
 def set_croche_duration(duration):
+    """ Emmma
+    role:
+    :param duration: string, duration of a note
+    no return:
+    effect on the program:
+    """
     # duration in string
     # pas de return parce que seulement effet de bord sur glob_croche_duration
     global glob_croche_duration
@@ -189,45 +244,6 @@ def set_croche_duration(duration):
         dur = float(duration)
         if 0 < dur < 4000:
             glob_croche_duration = dur / 1000
-
-
-def file_reading(file_name):  #Emma: Une fonction read_line_file(f, num) qui prend en paramètres un nom de fichier et un numéro de ligne et qui retourne le contenu de la ligne en question.
-    """
-    role:
-    :param file_name:
-    :return collection:
-    """
-    collection = []
-    file = open(file_name, "r", encoding="utf-8")  # indicate "r"ead only
-    line1 = file.readline()
-    # https://qastack.fr/programming/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
-    line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)   # + means it replace special characters present at least once
-    line2 = file.readline()
-    line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
-    while line2 != "":                     # to avoid end of lines and end of files, specific for Mac
-        collection.append((line1, line2))  # the last character of the line is a carriage return. /!\ carriage return has a different coding on Windows and on Mac
-        line1 = file.readline()
-        line1 = re.sub('[^A-Za-z0-9 èéêâ?!#\'\-]+', '', line1)
-        line2 = file.readline()
-        line2 = re.sub('[^A-Za-z0-9 ]+', '', line2)
-    file.close()
-    return collection
-
-
-def write_collection():
-    """
-    role:
-    no param:
-    no return:
-    effect on the program:
-    """
-    global glob_collection
-    file = open("partitions.txt", 'w', encoding="utf-8") # 'w' open for writing
-    for song in glob_collection:
-        (title, part) = song
-        file.write(title + "\n")
-        file.write(part + "\n")
-    file.close()
 
 
 # Functions to be called by graphical interface
@@ -240,9 +256,11 @@ def markov_chain_v1():
     effect on the program:
     """
     print("Markov chain v1")
-    print(creation_partition_v1(glob_collection))
-    print(creation_duree_v1(glob_collection))
-    print(noteduree_to_partition(creation_partition_v1(glob_collection), creation_duree_v1(glob_collection)))
+    nc = creation_partition_v1(glob_collection)
+    dc = creation_duree_v1(glob_collection)
+    title = "#" + str(len(glob_collection)) + " New musical rhythm of Markov1"
+    markov_song_v1 = (title, noteduree_to_partition(nc, dc))
+    addition_if_needed(markov_song_v1)
 
 
 def markov_chain_v2():
@@ -256,7 +274,6 @@ def markov_chain_v2():
     print("Markov chain v2")
     nc = creation_partition_v2(glob_collection)
     dc = creation_duree_v2(glob_collection)
-    print("nc = ", nc, "dc= ", dc)
     title = "#" + str(len(glob_collection)) + " New musical rhythm of Markov2"
     markov_song_v2 = (title, noteduree_to_partition(nc, dc))
     addition_if_needed(markov_song_v2)
@@ -280,7 +297,7 @@ def play_song():
         n = inversion(n)
 
     title_current_song = glob_collection[song_num][0]
-    addition_if_needed((title_creation(title_current_song, inv, tr), noteduree_to_partition(n,d)))
+    addition_if_needed((title_creation(title_current_song, inv, tr), noteduree_to_partition(n, d)))
 
     set_croche_duration(glob_croche_dur_sv.get())
     print("glob_croche_duration : ", glob_croche_duration, "glob_croche_dur_sv : ", glob_croche_dur_sv.get())
@@ -302,7 +319,7 @@ def setting_songs_list():
     for element in glob_collection:
         (title, part) = element
         lb.insert(tk.END, title)  # tk.END is a defined constant that is added at the end of a list
-    lb.select_set(0)              # set the default value
+    lb.select_set(0)  # set the default value
     lb.grid(row=0, column=0, rowspan=3)
     glob_lbsong = lb
 
@@ -411,14 +428,14 @@ def drawing1(signal):
     vertical_pre = 24 * (1 - y) + 3
     for h in range(1, 600):
         t = h / 1000
-        ind = int(t * 8000)
+        ind = int(t * sample_rate)
         if ind >= len(signal):
             break  # stop drawing if the signal finish before 0.6s
         y = signal[ind]
         vertical = 24 * (1 - y) + 3
         glob_canvas1.create_line(h - 1, vertical_pre, h, vertical, width=1, fill="blue")
         vertical_pre = vertical
-    glob_canvas1.update()   # useful for PC ??
+    glob_canvas1.update()  # useful for PC ??
 
 
 def drawing2(signal):
@@ -435,9 +452,9 @@ def drawing2(signal):
     for i in range(1, 100):
         t = i / 100
         horizontal = int(t * sample_rate)
-        glob_canvas2.create_line(horizontal+9, 148, horizontal+9, 156, width=1, fill="red")
+        glob_canvas2.create_line(horizontal + 9, 148, horizontal + 9, 156, width=1, fill="red")
         legend = "{0}s".format(t)
-        glob_canvas2.create_text(horizontal+9, 161, text=legend, fill="black")
+        glob_canvas2.create_text(horizontal + 9, 161, text=legend, fill="black")
 
     # vertical axis
     glob_canvas2.create_line(9, 5, 9, 300, width=1, fill="red")
@@ -452,11 +469,11 @@ def drawing2(signal):
 
     y = signal[0]
     vertical_pre = 149 * (1 - y) + 3
-    last_i = min(len(signal),600)
+    last_i = min(len(signal), 600)
     for i in range(1, last_i):
         y = signal[i]
         vertical = 149 * (1 - y) + 3
-        glob_canvas2.create_line(i-1+9, vertical_pre, i+9, vertical, width=1, fill="blue")
+        glob_canvas2.create_line(i - 1 + 9, vertical_pre, i + 9, vertical, width=1, fill="blue")
         vertical_pre = vertical
     glob_canvas2.update()  # useful on PC ??
 
@@ -478,5 +495,3 @@ setting_songs_list()
 canvas_settings()
 glob_root.mainloop()
 glob_root.quit()
-
-

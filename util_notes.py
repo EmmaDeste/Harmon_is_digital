@@ -212,18 +212,10 @@ def creation_partition_v1(l : list):
     :param l: collection of songs (tuples : title/partition)
     :return: new partition of note
     """
-    first = [0, 2, 4, 5, 7, 8, 11]
-    succ_do = []
-    succ_re = []
-    succ_mi = []
-    succ_fa = []
-    succ_sol = []
-    succ_la = []
-    succ_si = []
-    succ_z = []
+    first = set()
     succ = []
     for i in range(12):
-        succ.append([])
+        succ.append(set())
     for t in l:
         (titre, part) = t  # equivalent à part = t[1]
         (nc, dc) = partition_to_noteduree(part)
@@ -231,13 +223,14 @@ def creation_partition_v1(l : list):
             note = nc[i]
             suiv = nc[i + 1]
             if note >= 0 and suiv >= 0:
-                succ[note].append(suiv)
+                first.add(note)
+                succ[note].add(suiv)
     print("succ = ", succ)
     y = 0
-    m = random.choice(first)
+    m = random.choice(list(first))
     partition = [m]
     while y < 25:
-        m = random.choice(succ[m])
+        m = random.choice(list(succ[m]))
         partition.append(m)
         y += 1
     return partition
@@ -248,18 +241,10 @@ def creation_duree_v1(l : list):
     :param l: collection of songs (tuples: title/partition)
     :return: new partition of time
     """
-    first = [2, 3, 4, 6, 8, 12, 16, 24]
-    succ_c = []
-    succ_cp = []
-    succ_n = []
-    succ_np = []
-    succ_b = []
-    succ_bp = []
-    succ_r = []
-    succ_rp = []
+    first = set()
     succ = []
     for i in range(25):
-        succ.append([])
+        succ.append(set())
     for t in l:
         (titre, part) = t  # equivalent à part = t[1]
         (nc, dc) = partition_to_noteduree(part)
@@ -267,13 +252,14 @@ def creation_duree_v1(l : list):
             duree = dc[i]
             suiv = dc[i + 1]
             if duree >= 0 and suiv >= 0:
-                succ[duree].append(suiv)
+                first.add(duree)
+                succ[duree].add(suiv)
     print("succ = ", succ)
     y = 0
-    m = random.choice(first)
+    m = random.choice(list(first))
     partition = [m]
     while y < 25:
-        m = random.choice(succ[m])
+        m = random.choice(list(succ[m]))
         partition.append(m)
         y += 1
     return partition

@@ -6,7 +6,7 @@ Project: Harmony is digital
 Authors: Capucine Foucher and Emma Desté
 Promo: EFREI 2025
 Role: this is the file containing :
-- decode and uncode partition,
+- decode and encode partition,
 - associate frequencies to notes,
 - transposition,
 - inversion,
@@ -21,9 +21,10 @@ partition1 = "SOLc p Zc SOLn LAn SOLn DOn Zc SIb"
 
 def partition_to_noteduree(partition):  #Emma : Une fonction read_sheet qui à partir d’une ligne du fichier extrait les notes, les figures, les silences et les points de prolongation et construit une séquence de fréquences et de durée qu’elle retourne en sortie.??
     """
-
-    :param partition: partition en toutes lettres à transformer
+    Encode a partition to notes numbers and duration numbers
+    :param str partition: partition en toutes lettres à transformer
     :return: les notes et les durées sous forme de chiffres et séparées
+    :rtype: tuple (notes numbers, duration numbers)
     """
     l = partition.split(' ')
     n = []

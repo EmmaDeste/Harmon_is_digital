@@ -51,21 +51,19 @@ glob_croche_dur_sv = tk.StringVar()  # input area for the croche duration in ms,
 # Simpleaudio functions
 
 def sound_test_loudspeakers():
-    """ Emmma
+    """
     Sound test on left and right loudspeakers
-    no param:
-    no return: drive the audio output
+    :return None, drive the audio output
     effect on the program: audible sound played
     """
     fc.LeftRightCheck.run()
 
 
 def sound_test_superposition():
-    """ Emmma
+    """
     Sound test on superposition of notes
-    no param:
-    no return: drive the audio output
-    effect on the program: audible sound played
+    :return None, drive the audio output
+    effect on the program: multiple audible sounds played
     """
     fc.OverlappingCheck.run()
 
@@ -75,7 +73,7 @@ def play_note(frequence, musical_duration):
     Create the sound of a note based on its frequency, its duration and the instrument used
     :param int frequence: frequency in Hertz
     :param int musical_duration: duration of a note, e.g. 2 for croche, 16 for ronde
-    no return: drive the audio output
+    :return None, drive the audio output
     effect on the program: audible sound played
     """
     global glob_po
@@ -125,11 +123,11 @@ def play_note(frequence, musical_duration):
 
 
 def play_notes(frequence, duration):
-    """ Emmma
+    """
     Create the sound of each notes based on its frequency and its duration using the function play_note
     :param int frequence: frequency in Hertz
-    :param int duration: duration of a note
-    no return: drive the audio output
+    :param int duration: list of duration of notes, e.g. [2,16] for 1 croche and 1 ronde
+    :return None, drive the audio output
     effect on the program: sound of notes played
     """
     for i in range(len(frequence)):
@@ -139,14 +137,13 @@ def play_notes(frequence, duration):
 # General usage functions
 
 def exists_title(title):
-    """ Emmma
-    Detects if a title already exists in the collection
-    :param str title: title of the song
-    :return: if the title given in parameter already exists
-    :rtype: boolean
-    effect on the program: the function will tell to addition_if_needed if a new title appears
     """
-    global glob_collection
+    Detects if a title already exists in the collection
+    :param str title: title of the searched song
+    :return if the title given in parameter already exists
+    :rtype boolean
+    effect on the program: the function will tell to addition_if_needed if a new title need to appear
+    """
     for song in glob_collection:
         if title == song[0]:
             return True
@@ -154,11 +151,11 @@ def exists_title(title):
 
 
 def addition_if_needed(song):
-    """ Emmma
-    Detect a new song and add it in the collection, add its title in the listbox and and place the cursor on it
-    :param tuple song: song containing (titre, partition)
-    no return: indicate to other functions if a song has to be added
-    effect on the program: update the list of songs and the collection
+    """
+    Detect a new song and add it in the collection, add its title in the listbox and place the cursor on it
+    :param tuple song: song containing (title, partition)
+    :return None, directly add the song to glob_collection
+    effect on the program: update the list of songs and override text file with the updated collection
     """
     global glob_collection, glob_lbsong
     (title, part) = song
@@ -168,16 +165,16 @@ def addition_if_needed(song):
         glob_lbsong.select_clear(0, tk.END)  # to deselect all
         glob_lbsong.select_set(tk.END)  # to select the title of the song going on
         glob_lbsong.see(tk.END)  # to bring the scroll bar on the selected title
-    write_collection()  # to add the song to the collection
+    write_collection("partitions.txt")  # to add the song to the collection
 
 
 def file_reading(file_name):
-    """ Emmma
+    """
     Create a collection of songs by reading by pairs of lines the file
-    :param str file_name: name of the file that has to be red
+    :param str file_name: name of the file that has to be read
     :return collection: collection of the songs contained in the file
-    :rtype: list
-    effect on the program: create a collection of songs
+    :rtype list
+    effect on the program: create a collection of songs [(title1, partition1),(title2, partition2),...]
     """
     collection = []
     file = open(file_name, "r", encoding="utf-8")  # indicate "r"ead only
@@ -198,15 +195,15 @@ def file_reading(file_name):
     return collection
 
 
-def write_collection():
-    """ Emmma
-    Create a text file with the collection of songs by writing by pairs of lines
-    no param:
-    no return: create and write in a file separately
-    effect on the program: available file containing collection of songs
+def write_collection(file_name):
+    """
+    Create a text file with the collection of songs by writing pairs of lines
+    :param str file_name: name of the file that has to be written
+    :return None, create and write in a text file
+    effect on the program:  override the file containing collection of songs
     """
     global glob_collection
-    file = open("partitions.txt", 'w', encoding="utf-8")  # 'w' open for writing
+    file = open(file_name, 'w', encoding="utf-8")  # 'w' open for writing
     for song in glob_collection:
         (title, part) = song
         file.write(title + "\n")
@@ -215,13 +212,13 @@ def write_collection():
 
 
 def title_creation(title_current_song, inv, tr):
-    """ Emmma
-    Create a title for a new song based on the title of the current song
+    """
+    Create a title for a new song based on the title of the current song and transformation applied
     :param str title_current_song: title of the current song
-    :param int inv: ticked box or not
-    :param int tr: value of the transposition
+    :param int inv: ticked box or not, e.g. 1 if ticked
+    :param int tr: value of the transposition, e.g. -2 to down transposed of two half tones
     :return res: the new title
-    :rtype: str
+    :rtype str
     effect on the program: new songs have a fitting title
     """
     res = title_current_song
@@ -233,29 +230,28 @@ def title_creation(title_current_song, inv, tr):
 
 
 def set_croche_duration(duration):
-    """ Emmma
-    Calculate the value of the duration of a croche
-    :param str duration: duration of a note
-    no return: give the speed to the function play_song
-                only has an effect on glob_croche_duration
-    effect on the program: give the speed of the song
+    """
+    Set the croche duration in seconds based on a string giving the number of ms
+    :param str duration: duration of a note in ms
+    :return None, directly set the global variable glob_croche_duration
+    effect on the program: give the speed of the song, e.g. 250 is two times slower than 125
     """
     global glob_croche_duration
     # https://stackoverflow.com/questions/1265665/how-can-i-check-if-a-string-represents-an-int-without-using-try-except
     if duration.isdigit():
         dur = float(duration)
         if 0 < dur < 4000:
-            glob_croche_duration = dur / 1000
+            glob_croche_duration = dur / 1000  # to convert seconds in ms
 
 
 # Functions to be called by graphical interface
 
 def markov_chain_v1():
-    """ Emmma
-    Creation of a new musical rhythm using Markov chain version 1 with the functions creation_partition_1 and creation_duree_v1
-    no param:
-    no return:
-    effect on the program:
+    """
+    Creation of a new musical rhythm using Markov chain version 1 based on the full collection
+    glob_collection will be used as input (all songs) and output (one song added)
+    :return None, to be used by Tkinter menu
+    effect on the program: create a new song, add to the text file, add to the listbox
     """
     nc = creation_partition_v1(glob_collection)
     dc = creation_duree_v1(glob_collection)
@@ -265,11 +261,11 @@ def markov_chain_v1():
 
 
 def markov_chain_v2():
-    """ Emmma
-    Creation of a new musical rhythm using Markov chain version 2
-    no param: 
-    no return: 
-    effect on the program:
+    """
+    Creation of a new musical rhythm using Markov chain version 2 based on the full collection
+    glob_collection will be used as input (all songs) and output (one song added)
+    :return None, to be used by Tkinter menu
+    effect on the program: create a new song, add to the text file, add to the listbox
     """
     nc = creation_partition_v2(glob_collection)
     dc = creation_duree_v2(glob_collection)
@@ -279,10 +275,9 @@ def markov_chain_v2():
 
 
 def play_song():
-    """ Emmma
-    Create the sound of a song
-    no param:
-    no return: drive the audio output
+    """
+    Create and play the sound of the song currently selected in the list box
+    :return None, drive the audio output
     effect on the program: sound of the song played
     """
     song_num = glob_lbsong.curselection()[0]
@@ -304,14 +299,15 @@ def play_song():
     play_notes(f, d)
 
 
+# Graphical interface functions using Tkinter
+
 def setting_songs_list():
-    """ Emmma
-    Display the list of songs on the screen using the collection
-    no param:
-    no return: drive on the graphic interface
-    effect on the program:
     """
-    global glob_lbsong, glob_collection
+    Display the list of songs on the screen using the collection
+    :return None, drive on the graphic interface
+    effect on the program: full fill the listbox with all the titles
+    """
+    global glob_lbsong
     lb = tk.Listbox(glob_root, width=40, height=6,
                     selectmode=tk.SINGLE)
     for element in glob_collection:
@@ -322,14 +318,11 @@ def setting_songs_list():
     glob_lbsong = lb
 
 
-# Graphical interface functions using Tkinter
-
-def controls_settings():
-    """ Emmma
+def transformation_settings():
+    """
     Setting up a cell to enter the value of the transposition, a box to ticked for an inversion,
-    a cell to enter the value of the duration of a croche, the button to play
-    no param:
-    no return: drive on the graphic interface
+    a cell to enter the value of the duration of a croche and a button to trigger play
+    :return None, set up the graphic interface
     effect on the program: set the graphic interface to transform the play of a partition
     """
     global glob_root, glob_transpo
@@ -360,9 +353,8 @@ def controls_settings():
 def menus_settings():
     """
     Setting up the menus to choose to use the Markov chains, to test the loudspeakers and to use different instruments
-    no param:
-    no return: drive on the graphic interface
-    effect on the program: set the graphic interface to transform the play of a partition
+    :return None, set up the graphic interface
+    effect on the program: set the graphic interface regarding top bar menus
     """
     global glob_root
     glob_root.title("Capucine and Emma")
@@ -388,9 +380,8 @@ def menus_settings():
 
 def canvas_settings():
     """
-    Define two Canvas to have an area dedicaded to the drawings
-    no parameter:
-    no return: drive on the graphic interface
+    Define two Canvas to have an area dedicated to the drawings
+    :return None, set up the graphic interface
     impact of the program: signals could be draw in these two areas
     """
     global glob_canvas1, glob_canvas2
@@ -403,9 +394,9 @@ def canvas_settings():
 def drawing1(signal):
     """
     Draw the general signal of a note on a coordinate system
-    :param np.array signal: signal of a note
-    no return: drive on the graphic interface
-    effect on the program: display a drawing of the signal attitude
+    :param np.array signal: signal of a note between -1 and 1
+    :return None, drive on the graphic interface
+    effect on the program: display a drawing of the signal attitude during the first 600ms
     """
     glob_canvas1.delete("all")
     # horizontal axis
@@ -446,9 +437,10 @@ def drawing1(signal):
 def drawing2(signal):
     """
     Draw the signal of the beginning of a note on a coordinate system
-    :param np.array signal: signal between -1 and 1
-    no return: drive on the graphic interface
+    :param np.array signal: signal of a note between -1 and 1
+    :return None, drive on the graphic interface
     effect on the program: display a drawing of the beginning of signal
+    on the horizontal axis, 1 pixel corresponds to 1/glob_sample_rate seconds
     """
     glob_canvas2.delete("all")
     # horizontal axis
@@ -486,15 +478,16 @@ def drawing2(signal):
 
 def draw(signal):
     """
-    role:
-    :param signal:
-    no return:
+    Draw the signal on two Canvas
+    :param np.array signal: signal of a note between -1 and 1
+    :return None, drive on the graphic interface
+    effect on the program: display the signal on two drawings with different horizontal axis scale
     """
     drawing1(signal)
     drawing2(signal)
 
 
-controls_settings()
+transformation_settings()
 menus_settings()
 glob_collection = file_reading("partitions.txt")
 setting_songs_list()

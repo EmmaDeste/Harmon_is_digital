@@ -93,8 +93,8 @@ def transposition(p, k):
 def inversion(p):
     """
 
-    :param p: partition à inverser
-    :return: partition inversée
+    :param p: partition to inverse
+    :return: inversed partition
     """
     i = []
     for y in range(len(p)):

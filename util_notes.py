@@ -17,9 +17,8 @@ import random
 
 partition1 = "SOLc p Zc SOLn LAn SOLn DOn Zc SIb"
 
-#Emma : fonction calc_duration(figures, d0) qui prend en entrée la liste des 4 figures et la durée de la croche d0. Elle calcule les durées des autres figures et retourne un dictionnaire associant à chaque figure une durée.??
 
-def partition_to_noteduree(partition):  #Emma : Une fonction read_sheet qui à partir d’une ligne du fichier extrait les notes, les figures, les silences et les points de prolongation et construit une séquence de fréquences et de durée qu’elle retourne en sortie.??
+def partition_to_noteduree(partition):
     """
     Encode a partition to notes numbers and duration numbers
     :param str partition: partition en toutes lettres à transformer
@@ -56,7 +55,7 @@ def partition_to_noteduree(partition):  #Emma : Une fonction read_sheet qui à p
     return (nc, dc)
 
 
-def noteduree_to_partition(note_c: list, duree_c: list) -> list:
+def noteduree_to_partition(note_c, duree_c):
     """
 
     :param note_c: liste des notes chiffrées
@@ -106,7 +105,7 @@ def inversion(p):
     return i
 
 
-def frequences(l):   #Emma : est-ce qu'on remplace par la fonction calc_frequency(notes, frequences) qui prend en entrée une liste de notes et une liste de fréquences et qui retourne une variable de type dictionnaire associant à chaque note une fréquence ??
+def frequences(l):
     """
 
     :param l: list des notes chiffrées
@@ -120,7 +119,7 @@ def frequences(l):   #Emma : est-ce qu'on remplace par la fonction calc_frequenc
     return f
 
 
-def creation_duree_v2(l : list):
+def creation_duree_v2(l):
     """
 
     :param l: collection of song (tuples: title/partition)
@@ -142,8 +141,8 @@ def creation_duree_v2(l : list):
             suiv = dc[i + 1]
             if duree >= 0 and suiv >= 0:
                 succ[duree].append(suiv)
-    print("occur =", occur)
-    print("succ = ", succ)
+    #print("occur =", occur)
+    #print("succ = ", succ)
     y = 0
     max_occurence = max(occur)
     index = 0
@@ -154,7 +153,7 @@ def creation_duree_v2(l : list):
             i = index
         else:
             index += 1
-    print("max_occurence = ", max_occurence)  # trouver indice de la note qui apparait le plus
+    #print("max_occurence = ", max_occurence)  # trouver indice de la note qui apparait le plus
     m = i
     partition = [m]
     while y < 25:
@@ -164,7 +163,7 @@ def creation_duree_v2(l : list):
     return partition
 
 
-def creation_partition_v2(l: list):
+def creation_partition_v2(l):
     """
 
     :param l: collection of song (tuples : title/partition
@@ -186,8 +185,8 @@ def creation_partition_v2(l: list):
             suiv = nc[i + 1]
             if note >= 0 and suiv >= 0:
                 succ[note].append(suiv)
-    print("occur =", occur)
-    print("succ = ", succ)
+    #print("occur =", occur)
+    #print("succ = ", succ)
     y = 0
     max_occurence = max(occur)
     index = 0
@@ -198,7 +197,7 @@ def creation_partition_v2(l: list):
             i = index
         else:
             index += 1
-    print("max_occurence = ", max_occurence)  # trouver indice de la note qui apparait le plus
+    #print("max_occurence = ", max_occurence)  # trouver indice de la note qui apparait le plus
     m = i
     partition = [m]
     while y < 25:
@@ -207,7 +206,7 @@ def creation_partition_v2(l: list):
         y += 1
     return partition
 
-def creation_partition_v1(l : list):
+def creation_partition_v1(l):
     """
 
     :param l: collection of songs (tuples : title/partition)
@@ -226,7 +225,7 @@ def creation_partition_v1(l : list):
             if note >= 0 and suiv >= 0:
                 first.add(note)
                 succ[note].add(suiv)
-    print("succ = ", succ)
+    #print("succ = ", succ)
     y = 0
     m = random.choice(list(first))
     partition = [m]
@@ -236,7 +235,7 @@ def creation_partition_v1(l : list):
         y += 1
     return partition
 
-def creation_duree_v1(l : list):
+def creation_duree_v1(l):
     """
 
     :param l: collection of songs (tuples: title/partition)
@@ -255,7 +254,7 @@ def creation_duree_v1(l : list):
             if duree >= 0 and suiv >= 0:
                 first.add(duree)
                 succ[duree].add(suiv)
-    print("succ = ", succ)
+    #print("succ = ", succ)
     y = 0
     m = random.choice(list(first))
     partition = [m]

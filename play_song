@@ -1,0 +1,11 @@
+Function play_song():
+Copied parameters:
+Modified parameters:
+Local variables:
+(*Create and play the sound of the song currently selected in the list box *)
+Begin
+
+
+
+End
+

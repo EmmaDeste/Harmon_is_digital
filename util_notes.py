@@ -21,8 +21,8 @@ partition1 = "SOLc p Zc SOLn LAn SOLn DOn Zc SIb"
 def partition_to_noteduree(partition):
     """
     Encode a partition to notes numbers and duration numbers
-    :param str partition: partition en toutes lettres à transformer
-    :return: les notes et les durées sous forme de chiffres et séparées
+    :param str partition: partition composed of characters to transform
+    :return: notes and durations in the form of separated digits
     :rtype: tuple (notes numbers, duration numbers)
     """
     l = partition.split(' ')
@@ -58,9 +58,10 @@ def partition_to_noteduree(partition):
 def noteduree_to_partition(note_c, duree_c):
     """
 
-    :param note_c: liste des notes chiffrées
-    :param duree_c: liste des durées chiffrées
-    :return: partition lettrée
+    :param note_c: list of numeral notes
+    :param duree_c: list of numeral durations
+    :return: partition constituted of letters
+    :rtype: str
     """
     partition_l = ""
     dico_n = {0: "DO", 1: "DOD", 2: "RE", 3: "RED", 4: "MI",
@@ -75,9 +76,11 @@ def noteduree_to_partition(note_c, duree_c):
 
 def transposition(p, k):
     """
+
     :param p: partition
     :param k: number of semitones from which transpose
     :return: transposed partition
+    :rtype: str
     """
     t = []
     for i in range(len(p)):
@@ -94,6 +97,7 @@ def inversion(p):
 
     :param p: partition to inverse
     :return: inversed partition
+    :rtype: str
     """
     i = []
     for y in range(len(p)):
@@ -109,7 +113,8 @@ def frequences(l):
     """
 
     :param l: list of notes in number form
-    :return: list of frequences to play
+    :return: frequences to play
+    :rtype: list
     """
     f = []
     dico_f = {-1: -1, 0: 264, 1: 281.6, 2: 297, 3: 316.8, 4: 330, 5: 352, 6: 375.5, 7: 396, 8: 422.4, 9: 440,
@@ -124,6 +129,7 @@ def creation_duree_v2(l):
 
     :param l: collection of song (tuples: title/partition)
     :return: new partition of time
+    :rtype: str
     """
     occur = [0] * 25  # https://stackoverflow.com/questions/8528178/list-of-zeros-in-python
     succ = []
@@ -141,10 +147,8 @@ def creation_duree_v2(l):
             suiv = dc[i + 1]
             if duree >= 0 and suiv >= 0:
                 succ[duree].append(suiv)
-    #print("occur =", occur)
-    #print("succ = ", succ)
     y = 0
-    max_occurence = max(occur)
+    max_occurence = max(occur)   # trouver indice de la note qui apparait le plus
     index = 0
     found = False
     while index < len(occur) and found == False:
@@ -153,7 +157,6 @@ def creation_duree_v2(l):
             i = index
         else:
             index += 1
-    #print("max_occurence = ", max_occurence)  # trouver indice de la note qui apparait le plus
     m = i
     partition = [m]
     while y < 25:
@@ -168,6 +171,7 @@ def creation_partition_v2(l):
 
     :param l: collection of song (tuples : title/partition
     :return: new partition of note
+    :rtype: str
     """
     occur = [0] * 12  # https://stackoverflow.com/questions/8528178/list-of-zeros-in-python
     succ = []
@@ -185,10 +189,8 @@ def creation_partition_v2(l):
             suiv = nc[i + 1]
             if note >= 0 and suiv >= 0:
                 succ[note].append(suiv)
-    #print("occur =", occur)
-    #print("succ = ", succ)
     y = 0
-    max_occurence = max(occur)
+    max_occurence = max(occur) # trouver indice de la note qui apparait le plus
     index = 0
     found = False
     while index < len(occur) and found == False:
@@ -197,7 +199,6 @@ def creation_partition_v2(l):
             i = index
         else:
             index += 1
-    #print("max_occurence = ", max_occurence)  # trouver indice de la note qui apparait le plus
     m = i
     partition = [m]
     while y < 25:
@@ -211,6 +212,7 @@ def creation_partition_v1(l):
 
     :param l: collection of songs (tuples : title/partition)
     :return: new partition of note
+    :rtype: str
     """
     first = set()
     succ = []
@@ -225,7 +227,6 @@ def creation_partition_v1(l):
             if note >= 0 and suiv >= 0:
                 first.add(note)
                 succ[note].add(suiv)
-    #print("succ = ", succ)
     y = 0
     m = random.choice(list(first))
     partition = [m]
@@ -240,6 +241,7 @@ def creation_duree_v1(l):
 
     :param l: collection of songs (tuples: title/partition)
     :return: new partition of time
+    :rtype: str
     """
     first = set()
     succ = []
@@ -254,7 +256,6 @@ def creation_duree_v1(l):
             if duree >= 0 and suiv >= 0:
                 first.add(duree)
                 succ[duree].add(suiv)
-    #print("succ = ", succ)
     y = 0
     m = random.choice(list(first))
     partition = [m]
@@ -268,13 +269,7 @@ def creation_duree_v1(l):
 
 b = 5
 l = [0, 9, 2, 11, 7, 9, 5, 4]
-# print(transposition(l,b))
-# print(inversion(l))
 (n, d) = partition_to_noteduree(partition1)
-# print(n, d)
-# print(frequences(n))
-# s = noteduree_to_partition(n, d)
-# print(s)
-# print(partition_to_noteduree(s))
+
 
 

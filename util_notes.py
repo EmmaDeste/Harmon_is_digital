@@ -109,8 +109,8 @@ def inversion(p):
 def frequences(l):   #Emma : est-ce qu'on remplace par la fonction calc_frequency(notes, frequences) qui prend en entrée une liste de notes et une liste de fréquences et qui retourne une variable de type dictionnaire associant à chaque note une fréquence ??
     """
 
-    :param l: list des notes chiffrées
-    :return: listes des fraquences à jouer
+    :param l: list of notes in number form
+    :return: list of frequences to play
     """
     f = []
     dico_f = {-1: -1, 0: 264, 1: 281.6, 2: 297, 3: 316.8, 4: 330, 5: 352, 6: 375.5, 7: 396, 8: 422.4, 9: 440,

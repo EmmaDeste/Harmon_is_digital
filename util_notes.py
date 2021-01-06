@@ -77,8 +77,8 @@ def noteduree_to_partition(note_c: list, duree_c: list) -> list:
 def transposition(p, k):
     """
     :param p: partition
-    :param k: nombre de demi-ton duquel transposé
-    :return: partition transposée
+    :param k: number of semitones from which transpose
+    :return: transposed partition
     """
     t = []
     for i in range(len(p)):
@@ -93,8 +93,8 @@ def transposition(p, k):
 def inversion(p):
     """
 
-    :param p: partition à inverser
-    :return: partition inversée
+    :param p: partition to inverse
+    :return: inversed partition
     """
     i = []
     for y in range(len(p)):
